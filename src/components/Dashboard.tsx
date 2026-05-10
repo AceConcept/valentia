@@ -67,11 +67,9 @@ export function Dashboard() {
           return;
         }
         setLeftCandles(body.candles as Candle[]);
-        if (body.source === "coingecko" && typeof body.note === "string") {
-          setLeftCaption(body.note);
-        } else {
-          setLeftCaption(DEFAULT_CAPTION);
-        }
+        setLeftCaption(
+          typeof body.note === "string" ? body.note : DEFAULT_CAPTION,
+        );
       } catch {
         if (!cancelled) {
           setLeftError("Network error");
@@ -112,11 +110,9 @@ export function Dashboard() {
           return;
         }
         setRightCandles(body.candles as Candle[]);
-        if (body.source === "coingecko" && typeof body.note === "string") {
-          setRightCaption(body.note);
-        } else {
-          setRightCaption(DEFAULT_CAPTION);
-        }
+        setRightCaption(
+          typeof body.note === "string" ? body.note : DEFAULT_CAPTION,
+        );
       } catch {
         if (!cancelled) {
           setRightError("Network error");

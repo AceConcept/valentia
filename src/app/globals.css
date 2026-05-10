@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
+/*
+ * Design artboard: 2550 × 1440 (16:9). Layout uses rem; 1rem = 16 design px at full scale.
+ * Width: 2550 / 16 = 159.375rem — Height: 1440 / 16 = 90rem
+ * Root font-size scales so the artboard fits the viewport (letterboxed).
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --board-w-rem: 159.375;
+  --board-h-rem: 90;
+  --background: #060708;
+  --foreground: #e8eaed;
 }
 
 @theme inline {
@@ -12,15 +19,31 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  height: 100%;
+  font-size: min(
+    100vw / var(--board-w-rem),
+    100vh / var(--board-h-rem)
+  );
+  background: var(--background);
 }
 
 body {
+  margin: 0;
+  min-height: 100%;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.artboard {
+  width: calc(var(--board-w-rem) * 1rem);
+  height: calc(var(--board-h-rem) * 1rem);
+  flex-shrink: 0;
+  overflow: hidden;
+  /* 1 design px → rem at reference 16px/unit */
+  box-shadow: 0 0 0 0.0625rem #2a2e39;
 }

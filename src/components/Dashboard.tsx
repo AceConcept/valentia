@@ -10,6 +10,7 @@ import { CandlestickChart } from "@/components/CandlestickChart";
 import { HeaderTradeToolbar } from "@/components/HeaderTradeToolbar";
 import { CryptoIcon } from "@/components/CryptoIcon";
 import { MultiSymbolChartAnalysis } from "@/components/MultiSymbolChartAnalysis";
+import { SingleTokenChartToolbar } from "@/components/SingleTokenChartToolbar";
 import type { Candle } from "@/lib/candles";
 import { MARKETS, marketBySymbol } from "@/lib/tokens";
 
@@ -264,6 +265,7 @@ export function Dashboard() {
               </p>
             </div>
           )}
+          <SingleTokenChartToolbar />
           <div className="flex h-[45rem] min-h-0 shrink-0 flex-col rounded-[0.5rem] border-[0.0625rem] border-v-border bg-v-panel">
             <div className="border-b-[0.0625rem] border-v-border bg-[color:var(--v-chart-bg)] px-[1.5rem] py-[1rem]">
               <h2 className="text-[1.25rem] font-medium">

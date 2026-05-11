@@ -166,11 +166,31 @@ const CARDS: InsightCard[] = [
 
 const CARD_ROWS: InsightCard[][] = [CARDS.slice(0, 3), CARDS.slice(3, 6)];
 
+const INSIGHT_MARK_BOX =
+  "flex h-[2.25rem] w-[2.25rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border bg-v-panel text-v-subtle";
+
+function TriangleLogo() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path d="M12 5.2L20.2 19.8H3.8L12 5.2z" />
+    </svg>
+  );
+}
+
 function InsightCardArticle({ card }: { card: InsightCard }) {
   return (
     <article className="flex min-w-0 flex-1 flex-col gap-[0.75rem] rounded-[0.5rem] border-[0.0625rem] border-v-border bg-[#161616] p-[1.125rem]">
-      <div className="flex h-[2.25rem] w-[2.25rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border bg-v-panel text-v-subtle">
-        {card.icon}
+      <div className="flex shrink-0 flex-col gap-[0.5rem]">
+        <div className={INSIGHT_MARK_BOX}>
+          <TriangleLogo />
+        </div>
+        <div className={INSIGHT_MARK_BOX}>{card.icon}</div>
       </div>
       <div className="min-w-0">
         <p className="text-[0.8125rem] font-medium text-v-subtle">
@@ -196,7 +216,7 @@ export function MultiSymbolChartAnalysis() {
       {CARD_ROWS.map((row) => (
         <div
           key={row.map((c) => c.headline).join("-")}
-          className="flex w-full min-w-0 shrink-0 gap-[2.5rem]"
+          className="flex w-full min-w-0 shrink-0 gap-[1.25rem]"
         >
           {row.map((card) => (
             <InsightCardArticle key={card.headline} card={card} />

@@ -11,8 +11,11 @@ import {
 } from "lightweight-charts";
 import { useEffect, useRef, useState } from "react";
 
-/** Design assumes 1rem ≈ 16px at reference — matches globals.css artboard math. */
+/** Design space: `html { font-size: 16px; }` — rem is stable; stage is scaled via CSS transform. */
 const DESIGN_ROOT_PX = 16;
+
+/** Axis / layout text — minimum 20 design px (1.25rem at 16px root). */
+const DESIGN_AXIS_FONT_PX = 20;
 
 /** Library default bar gap is ~6px at 16px root; higher = wider candle bodies. */
 const DESIGN_BAR_SPACING = 12;
@@ -32,11 +35,19 @@ function rootRemPx(): number {
 }
 
 /**
- * Convert “design px” at 16px root into current CSS px at this rem scale.
- * Maps library defaults (6px bar gap, 12px labels, …) to your rem artboard.
+ * Convert “design px” at 16px root into CSS px (same as design px while root stays 16px).
+ * Maps library defaults (bar gap, labels, …) to chart options.
  */
 function dpx(designPx: number): number {
   return (designPx * rootRemPx()) / DESIGN_ROOT_PX;
+}
+
+function cssVar(name: string, fallback: string): string {
+  if (typeof document === "undefined") return fallback;
+  const v = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+  return v || fallback;
 }
 
 /**
@@ -99,29 +110,37 @@ export function CandlestickChart({ candles, className }: Props) {
       Math.max(1, Math.round(dpx(1))),
     ) as 1 | 2 | 3 | 4;
 
+    const chartBg = cssVar("--v-chart-bg", "#0a0a0a");
+    const gridColor = cssVar("--v-grid", "#1c1c1c");
+    const borderColor = cssVar("--v-border", "#2a2a2a");
+    const crosshairColor = cssVar("--v-crosshair", "#5c5c5c");
+    const axisText = cssVar("--v-chart-label", "#8a8a8a");
+    const candleUp = cssVar("--v-candle-up", "#5ce1c6");
+    const candleDown = cssVar("--v-candle-down", "#ff8b9a");
+
     const chart = createChart(el, {
       autoSize: false,
       ...interactionChartOptions(true),
       layout: {
-        background: { type: ColorType.Solid, color: "#131722" },
-        textColor: "#b2b5be",
-        fontSize: dpx(12),
+        background: { type: ColorType.Solid, color: chartBg },
+        textColor: axisText,
+        fontSize: dpx(DESIGN_AXIS_FONT_PX),
         fontFamily:
           typeof document !== "undefined"
             ? getComputedStyle(document.body).fontFamily || "system-ui, sans-serif"
             : "system-ui, sans-serif",
       },
       grid: {
-        vertLines: { color: "#2a2e39" },
-        horzLines: { color: "#2a2e39" },
+        vertLines: { color: gridColor },
+        horzLines: { color: gridColor },
       },
       crosshair: {
-        vertLine: { color: "#758696", width: hairline },
-        horzLine: { color: "#758696", width: hairline },
+        vertLine: { color: crosshairColor, width: hairline },
+        horzLine: { color: crosshairColor, width: hairline },
       },
-      rightPriceScale: { borderColor: "#2a2e39" },
+      rightPriceScale: { borderColor: borderColor },
       timeScale: {
-        borderColor: "#2a2e39",
+        borderColor: borderColor,
         barSpacing: dpx(DESIGN_BAR_SPACING),
         minBarSpacing: dpx(DESIGN_MIN_BAR_SPACING),
         lockVisibleTimeRangeOnResize: true,
@@ -129,11 +148,11 @@ export function CandlestickChart({ candles, className }: Props) {
     });
 
     const series = chart.addSeries(CandlestickSeries, {
-      upColor: "#26a69a",
-      downColor: "#ef5350",
+      upColor: candleUp,
+      downColor: candleDown,
       borderVisible: false,
-      wickUpColor: "#26a69a",
-      wickDownColor: "#ef5350",
+      wickUpColor: candleUp,
+      wickDownColor: candleDown,
     });
 
     chartRef.current = chart;
@@ -147,13 +166,13 @@ export function CandlestickChart({ candles, className }: Props) {
 
       chart.applyOptions({
         layout: {
-          fontSize: dpx(12),
+          fontSize: dpx(DESIGN_AXIS_FONT_PX),
           fontFamily:
             getComputedStyle(document.body).fontFamily || "system-ui, sans-serif",
         },
         crosshair: {
-          vertLine: { color: "#758696", width: h },
-          horzLine: { color: "#758696", width: h },
+          vertLine: { color: crosshairColor, width: h },
+          horzLine: { color: crosshairColor, width: h },
         },
         timeScale: {
           barSpacing: dpx(DESIGN_BAR_SPACING),
@@ -229,7 +248,7 @@ export function CandlestickChart({ candles, className }: Props) {
           className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex justify-center pb-[0.75rem]"
           aria-hidden
         >
-          <span className="rounded-[0.375rem] bg-[#131722]/90 px-[0.75rem] py-[0.375rem] font-mono text-[0.75rem] text-[#758696]">
+          <span className="rounded-[0.375rem] bg-v-panel/90 px-[0.75rem] py-[0.375rem] font-mono text-[1.25rem] text-v-muted">
             Click chart to pan and zoom
           </span>
         </div>

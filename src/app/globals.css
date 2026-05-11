@@ -1,49 +1,128 @@
 @import "tailwindcss";
 
 /*
- * Design artboard: 2550 × 1440 (16:9). Layout uses rem; 1rem = 16 design px at full scale.
- * Width: 2550 / 16 = 159.375rem — Height: 1440 / 16 = 90rem
- * Root font-size scales so the artboard fits the viewport (letterboxed).
+ * Scaled artboard (Luna-style): fixed design canvas 2560 × 1440, uniform scale to fit window.
+ * - html font-size is fixed at 16px so 1rem is stable design space.
+ * - Stage is 160rem × 90rem (= 2560×1440 at 16px/rem).
+ * - scale = min(innerWidth / 2560, innerHeight / 1440) applied as transform on .svp-stage
+ *   (see ScaledViewport.tsx). Do not rescale individual widgets—only the stage transform.
  */
 :root {
-  --board-w-rem: 159.375;
+  --board-w-rem: 160;
   --board-h-rem: 90;
-  --background: #060708;
-  --foreground: #e8eaed;
+  /* Neutral black (Cursor-like) — no blue-gray chrome */
+  --background: #000000;
+  --foreground: #ebebeb;
+  --v-panel: #111111;
+  --v-border: #2a2a2a;
+  --v-muted: #7c7c7c;
+  --v-subtle: #b8b8b8;
+  --v-hover: #1a1a1a;
+  --v-chart-bg: #0a0a0a;
+  --v-grid: #1c1c1c;
+  --v-crosshair: #5c5c5c;
+  /* Axis / watermark text on chart canvas */
+  --v-chart-label: #8a8a8a;
+  /* OHLC — cyan mint up, soft rose down (fits black UI, not legacy teal/red) */
+  --v-candle-up: #5ce1c6;
+  --v-candle-down: #ff8b9a;
+  /* Header toolbar controls: 56px at design reference (1rem = 16px on artboard) */
+  --v-header-toolbar-btn-h: 3.5rem;
+  /* App header bar: 100px at design reference */
+  --v-app-header-h: 6.25rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-v-panel: var(--v-panel);
+  --color-v-border: var(--v-border);
+  --color-v-muted: var(--v-muted);
+  --color-v-subtle: var(--v-subtle);
+  --color-v-hover: var(--v-hover);
+  --color-v-candle-up: var(--v-candle-up);
+  --color-v-candle-down: var(--v-candle-down);
+  --font-sans: var(--font-ibm-plex-mono), ui-monospace, monospace;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
 }
 
 html {
   height: 100%;
-  font-size: min(
-    100vw / var(--board-w-rem),
-    100vh / var(--board-h-rem)
-  );
+  width: 100%;
+  font-size: 16px;
   background: var(--background);
 }
 
 body {
   margin: 0;
-  min-height: 100%;
-  background: var(--background);
+  height: 100%;
+  min-height: 100dvh;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-ibm-plex-mono), ui-monospace, monospace;
+}
+
+/* Outer: fullscreen, center stage, letterbox gutters */
+.svp-root {
+  position: fixed;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: rgba(199, 199, 199, 1);
 }
 
-.artboard {
+/* Inner: design-size surface; ScaledViewport sets transform: scale(...) */
+.svp-stage {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   width: calc(var(--board-w-rem) * 1rem);
   height: calc(var(--board-h-rem) * 1rem);
   flex-shrink: 0;
+  min-height: 0;
+  min-width: 0;
   overflow: hidden;
-  /* 1 design px → rem at reference 16px/unit */
-  box-shadow: 0 0 0 0.0625rem #2a2e39;
+  box-shadow: 0 0 0 0.0625rem var(--v-border);
+}
+
+/* —— Market ticker (under AppHeader): seamless R→L marquee —— */
+@keyframes market-ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes ticker-bar-pulse {
+  0%,
+  100% {
+    opacity: 0.82;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.18);
+  }
+}
+
+.market-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: market-ticker-scroll 48s linear infinite;
+  will-change: transform;
+}
+
+.market-ticker-root:hover .market-ticker-track {
+  animation-play-state: paused;
+}
+
+.ticker-bar-fill {
+  animation: ticker-bar-pulse 2.2s ease-in-out infinite;
 }

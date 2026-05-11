@@ -3,12 +3,15 @@
 import type { CandlestickData, Time } from "lightweight-charts";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { AppHeader } from "@/components/AppHeader";
+import { AppShell } from "@/components/AppShell";
+import { MarketTickerBar, MarketTickerStrip, buildRows, formatPriceUSD } from "@/components/MarketTickerBar";
 import { CandlestickChart } from "@/components/CandlestickChart";
+import { HeaderTradeToolbar } from "@/components/HeaderTradeToolbar";
+import { CryptoIcon } from "@/components/CryptoIcon";
+import { MultiSymbolChartAnalysis } from "@/components/MultiSymbolChartAnalysis";
 import type { Candle } from "@/lib/candles";
-import { MARKETS } from "@/lib/tokens";
-
-const DEFAULT_CAPTION =
-  "Data via Binance public API (proxied through this app).";
+import { MARKETS, marketBySymbol } from "@/lib/tokens";
 
 const DND_MIME = "application/x-valentia-market+json";
 
@@ -35,16 +38,21 @@ export function Dashboard() {
   const [rightLabel, setRightLabel] = useState<string | null>(null);
 
   const [dropHover, setDropHover] = useState(false);
+  /** True after user picks a different list item than Chart A; shows compare zone until Chart B is set or user collapses. */
+  const [compareZoneOpen, setCompareZoneOpen] = useState(false);
+  /** True while dragging from the spot list so the compare column exists in the DOM (drop target). */
+  const [listDragActive, setListDragActive] = useState(false);
 
   const [leftCandles, setLeftCandles] = useState<Candle[]>([]);
   const [leftLoading, setLeftLoading] = useState(true);
   const [leftError, setLeftError] = useState<string | null>(null);
-  const [leftCaption, setLeftCaption] = useState(DEFAULT_CAPTION);
 
   const [rightCandles, setRightCandles] = useState<Candle[]>([]);
   const [rightLoading, setRightLoading] = useState(false);
   const [rightError, setRightError] = useState<string | null>(null);
-  const [rightCaption, setRightCaption] = useState(DEFAULT_CAPTION);
+
+  /** Bumps on reset so charts remount and restore default zoom / interaction lock. */
+  const [chartLayoutKey, setChartLayoutKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,9 +75,6 @@ export function Dashboard() {
           return;
         }
         setLeftCandles(body.candles as Candle[]);
-        setLeftCaption(
-          typeof body.note === "string" ? body.note : DEFAULT_CAPTION,
-        );
       } catch {
         if (!cancelled) {
           setLeftError("Network error");
@@ -110,9 +115,6 @@ export function Dashboard() {
           return;
         }
         setRightCandles(body.candles as Candle[]);
-        setRightCaption(
-          typeof body.note === "string" ? body.note : DEFAULT_CAPTION,
-        );
       } catch {
         if (!cancelled) {
           setRightError("Network error");
@@ -139,18 +141,31 @@ export function Dashboard() {
   );
 
   const anyLoading = leftLoading || (rightSymbol !== null && rightLoading);
-  const compareMode = rightSymbol !== null;
+  const dualChartsLoaded = rightSymbol !== null;
+  const showCompareColumn =
+    compareZoneOpen || dualChartsLoaded || listDragActive;
+  const tickerRows = useMemo(() => buildRows(), []);
 
-  const handleSelectChartA = useCallback(
-    (m: (typeof MARKETS)[number]) => {
-      setLeftSymbol(m.symbol);
-      setLeftLabel(m.label);
-    },
-    [],
+  const leftMarket = useMemo(() => marketBySymbol(leftSymbol), [leftSymbol]);
+  const rightMarket = useMemo(
+    () => (rightSymbol ? marketBySymbol(rightSymbol) : undefined),
+    [rightSymbol],
   );
+
+  const resetRightPane = useCallback(() => {
+    setRightSymbol(null);
+    setRightLabel(null);
+    setRightCandles([]);
+    setRightError(null);
+  }, []);
+
+  const onListDragEnd = useCallback(() => {
+    setListDragActive(false);
+  }, []);
 
   const onMarketDragStart = useCallback(
     (m: (typeof MARKETS)[number]) => (e: React.DragEvent) => {
+      setListDragActive(true);
       const payload: MarketDragPayload = {
         symbol: m.symbol,
         label: m.label,
@@ -174,6 +189,17 @@ export function Dashboard() {
         /* fall through */
       }
     }
+    const plain = e.dataTransfer.getData("text/plain").trim();
+    if (plain) {
+      const market = MARKETS.find((x) => x.symbol === plain);
+      if (market) {
+        return {
+          symbol: market.symbol,
+          label: market.label,
+          id: market.id,
+        } satisfies MarketDragPayload;
+      }
+    }
     return null;
   }, []);
 
@@ -183,10 +209,12 @@ export function Dashboard() {
       setDropHover(false);
       const p = parseDropPayload(e);
       if (!p) return;
+      if (p.symbol === leftSymbol) return;
       setRightSymbol(p.symbol);
       setRightLabel(p.label);
+      setCompareZoneOpen(false);
     },
-    [parseDropPayload],
+    [leftSymbol, parseDropPayload],
   );
 
   const onCompareDragOver = useCallback((e: React.DragEvent) => {
@@ -195,180 +223,129 @@ export function Dashboard() {
   }, []);
 
   const clearCompareChart = useCallback(() => {
-    setRightSymbol(null);
-    setRightLabel(null);
-    setRightCandles([]);
-    setRightError(null);
-    setRightCaption(DEFAULT_CAPTION);
-  }, []);
+    resetRightPane();
+    setCompareZoneOpen(false);
+  }, [resetRightPane]);
+
+  const handleSelectChartA = useCallback(
+    (m: (typeof MARKETS)[number]) => {
+      if (m.symbol === leftSymbol) {
+        clearCompareChart();
+        return;
+      }
+      setLeftSymbol(m.symbol);
+      setLeftLabel(m.label);
+      resetRightPane();
+      setCompareZoneOpen(true);
+    },
+    [leftSymbol, clearCompareChart, resetRightPane],
+  );
+
+  const handleResetCharts = useCallback(() => {
+    clearCompareChart();
+    setLeftSymbol(MARKETS[0].symbol);
+    setLeftLabel(MARKETS[0].label);
+    setChartLayoutKey((k) => k + 1);
+  }, [clearCompareChart]);
 
   return (
-    <div className="flex h-full w-full flex-col bg-[#0c0e12] text-[#e8eaed]">
-      <header className="flex h-[5.5rem] shrink-0 items-center border-b border-[#2a2e39] px-[2.5rem]">
-        <div>
-          <p className="font-mono text-[0.875rem] uppercase tracking-[0.125rem] text-[#758696]">
-            Valentia
-          </p>
-          <h1 className="text-[1.75rem] font-semibold tracking-tight">
-            Markets
-          </h1>
-        </div>
-        <div className="ml-auto flex max-w-[60%] flex-col items-end gap-[0.25rem] text-right">
-          <div className="flex flex-wrap items-baseline justify-end gap-x-[1rem] gap-y-[0.25rem]">
-            <span className="font-mono text-[1.125rem] text-[#26a69a]">
-              {leftSymbol.replace("USDT", "")}
-              <span className="text-[#758696]">/USDT</span>
-              <span className="ml-[0.5rem] text-[1rem] font-sans text-[#758696]">
-                {leftLabel}
-              </span>
-            </span>
-            {compareMode && rightLabel !== null ? (
-              <>
-                <span className="text-[0.875rem] text-[#758696]">vs</span>
-                <span className="font-mono text-[1.125rem] text-[#26a69a]">
-                  {rightSymbol.replace("USDT", "")}
-                  <span className="text-[#758696]">/USDT</span>
-                  <span className="ml-[0.5rem] text-[1rem] font-sans text-[#758696]">
-                    {rightLabel}
-                  </span>
-                </span>
-              </>
-            ) : null}
-          </div>
-          <p className="max-w-[28rem] text-[0.75rem] text-[#758696]">
-            Click a pair for Chart A · Drag any pair into the compare zone for
-            Chart B
-          </p>
-        </div>
-      </header>
+    <AppShell>
+      <AppHeader
+        toolbar={<HeaderTradeToolbar onResetCharts={handleResetCharts} />}
+      />
+      <MarketTickerStrip />
 
       <div className="flex min-h-0 flex-1">
-        <aside className="flex w-[38rem] shrink-0 flex-col border-r border-[#2a2e39] bg-[#131722]">
-          <div className="border-b border-[#2a2e39] px-[1.75rem] py-[1.25rem]">
-            <p className="font-mono text-[0.75rem] uppercase tracking-wider text-[#758696]">
-              Spot pairs
-            </p>
-          </div>
-          <nav className="flex flex-col gap-[0.5rem] overflow-y-auto p-[1.25rem]">
-            {MARKETS.map((m) => {
-              const onLeft = m.symbol === leftSymbol;
-              const onRight = compareMode && m.symbol === rightSymbol;
-              const active = onLeft || onRight;
-              return (
-                <button
-                  key={m.id}
-                  type="button"
-                  draggable
-                  onDragStart={onMarketDragStart(m)}
-                  onClick={() => handleSelectChartA(m)}
-                  className={`flex cursor-grab items-center justify-between rounded-[0.5rem] px-[1.25rem] py-[1rem] text-left transition-colors active:cursor-grabbing ${
-                    active
-                      ? onRight && !onLeft
-                        ? "bg-[#7c4dff]/20 text-[#b388ff]"
-                        : "bg-[#2962ff]/20 text-[#82b1ff]"
-                      : "bg-transparent text-[#b2b5be] hover:bg-[#2a2e39]"
-                  }`}
-                >
-                  <span className="text-[1.125rem] font-medium">{m.id}</span>
-                  <span className="flex items-center gap-[0.5rem] text-[0.875rem] text-[#758696]">
-                    {onLeft ? (
-                      <span className="font-mono text-[0.625rem] uppercase text-[#82b1ff]">
-                        A
-                      </span>
-                    ) : null}
-                    {onRight ? (
-                      <span className="font-mono text-[0.625rem] uppercase text-[#b388ff]">
-                        B
-                      </span>
-                    ) : null}
-                    {m.label}
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
-        </aside>
-
-        <main className="relative flex min-h-0 min-w-0 flex-1 flex-col p-[2rem]">
+        <main className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-[2rem]">
           {anyLoading && (
-            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[#0c0e12]/60 backdrop-blur-[0.125rem]">
-              <p className="font-mono text-[1rem] text-[#758696]">
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[0.125rem]">
+              <p className="font-mono text-[1.25rem] text-v-muted">
                 Loading candles…
               </p>
             </div>
           )}
-          <div className="flex min-h-0 flex-1 flex-col rounded-[0.5rem] border border-[#2a2e39] bg-[#131722]">
-            <div className="border-b border-[#2a2e39] px-[1.5rem] py-[1rem]">
-              <h2 className="text-[1.125rem] font-medium">
-                {compareMode ? "Compare — 1h candlesticks" : "1h candlesticks"}
+          <div className="flex h-[45rem] min-h-0 shrink-0 flex-col rounded-[0.5rem] border-[0.0625rem] border-v-border bg-v-panel">
+            <div className="border-b-[0.0625rem] border-v-border bg-[color:var(--v-chart-bg)] px-[1.5rem] py-[1rem]">
+              <h2 className="text-[1.25rem] font-medium">
+                {showCompareColumn
+                  ? "Compare — 1h candlesticks"
+                  : "1h candlesticks"}
               </h2>
-              <p className="mt-[0.25rem] text-[0.875rem] leading-snug text-[#758696]">
-                {compareMode
-                  ? "Each pane uses the same data source note when both are Binance; CoinGecko fallback shows USD OHLC per pane."
-                  : leftCaption}
-              </p>
             </div>
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-row gap-[1rem] p-[1rem]">
-              <section className="flex min-h-0 min-w-0 w-1/2 flex-1 flex-col">
-                <div className="mb-[0.5rem] flex shrink-0 items-baseline justify-between gap-[0.75rem]">
-                  <h3 className="font-mono text-[0.875rem] font-medium text-[#b2b5be]">
+              <section
+                className={
+                  showCompareColumn
+                    ? "flex min-h-0 min-w-0 flex-[1_1_50%] flex-col"
+                    : "flex min-h-0 min-w-0 flex-1 flex-col"
+                }
+              >
+                <div className="mb-[0.5rem] flex shrink-0 items-center justify-between gap-[0.75rem]">
+                  <h3 className="flex items-center gap-[0.5rem] font-mono text-[1.25rem] font-medium text-v-subtle">
+                    {leftMarket ? (
+                      <CryptoIcon
+                        iconSlug={leftMarket.iconSlug}
+                        label={leftLabel}
+                        className="h-[1.5rem] w-[1.5rem]"
+                      />
+                    ) : null}
                     {leftSymbol.replace("USDT", "")}/USDT
                   </h3>
-                  <span className="text-[0.75rem] uppercase tracking-wide text-[#758696]">
+                  <span className="text-[1.25rem] uppercase tracking-wide text-v-muted">
                     Chart A
                   </span>
                 </div>
                 {leftError ? (
-                  <div className="mb-[0.75rem] rounded-[0.5rem] border border-[#ef5350]/40 bg-[#ef5350]/10 px-[1rem] py-[0.75rem] font-mono text-[0.8125rem] text-[#ffb4b4]">
+                  <div className="mb-[0.75rem] rounded-[0.5rem] border-[0.0625rem] border-red-500/30 bg-red-950/35 px-[1rem] py-[0.75rem] font-mono text-[1.25rem] text-red-200">
                     {leftError}
                   </div>
                 ) : null}
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                  <p className="mb-[0.5rem] shrink-0 text-[0.75rem] leading-snug text-[#758696]">
-                    {leftCaption}
-                  </p>
                   <CandlestickChart
-                    key={leftSymbol}
+                    key={`${leftSymbol}-${chartLayoutKey}`}
                     candles={leftChartData}
                     className="h-full min-h-0 w-full min-w-0 flex-1"
                   />
                 </div>
               </section>
 
-              <section className="flex min-h-0 min-w-0 w-1/2 flex-1 flex-col border-l border-[#2a2e39] pl-[1rem]">
-                {compareMode &&
-                rightSymbol !== null &&
-                rightLabel !== null ? (
+              {showCompareColumn ? (
+                <section className="flex min-h-0 min-w-0 flex-[1_1_50%] flex-col border-l-[0.0625rem] border-v-border pl-[1rem]">
+                {rightSymbol !== null && rightLabel !== null ? (
                   <>
-                    <div className="mb-[0.5rem] flex shrink-0 items-baseline justify-between gap-[0.75rem]">
-                      <h3 className="font-mono text-[0.875rem] font-medium text-[#b2b5be]">
+                    <div className="mb-[0.5rem] flex min-h-[3.5rem] shrink-0 items-center justify-between gap-[0.75rem]">
+                      <h3 className="flex items-center gap-[0.5rem] font-mono text-[1.25rem] font-medium text-v-subtle">
+                        {rightMarket ? (
+                          <CryptoIcon
+                            iconSlug={rightMarket.iconSlug}
+                            label={rightLabel}
+                            className="h-[1.5rem] w-[1.5rem]"
+                          />
+                        ) : null}
                         {rightSymbol.replace("USDT", "")}/USDT
                       </h3>
-                      <div className="flex items-center gap-[0.75rem]">
-                        <span className="text-[0.75rem] uppercase tracking-wide text-[#758696]">
+                      <div className="flex h-[3.5rem] items-center gap-[0.75rem]">
+                        <span className="text-[1.25rem] uppercase tracking-wide text-v-muted">
                           Chart B
                         </span>
                         <button
                           type="button"
                           onClick={clearCompareChart}
-                          className="rounded-[0.375rem] border border-[#2a2e39] px-[0.5rem] py-[0.125rem] font-mono text-[0.6875rem] text-[#758696] hover:border-[#758696] hover:text-[#b2b5be]"
+                          className="inline-flex h-[3.5rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border px-[1rem] font-mono text-[1.25rem] text-v-muted hover:border-v-muted hover:text-v-subtle"
                         >
                           Remove
                         </button>
                       </div>
                     </div>
                     {rightError ? (
-                      <div className="mb-[0.75rem] rounded-[0.5rem] border border-[#ef5350]/40 bg-[#ef5350]/10 px-[1rem] py-[0.75rem] font-mono text-[0.8125rem] text-[#ffb4b4]">
+                      <div className="mb-[0.75rem] rounded-[0.5rem] border-[0.0625rem] border-red-500/30 bg-red-950/35 px-[1rem] py-[0.75rem] font-mono text-[1.25rem] text-red-200">
                         {rightError}
                       </div>
                     ) : null}
                     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                      <p className="mb-[0.5rem] shrink-0 text-[0.75rem] leading-snug text-[#758696]">
-                        {rightCaption}
-                      </p>
                       <CandlestickChart
-                        key={rightSymbol}
+                        key={`${rightSymbol}-${chartLayoutKey}`}
                         candles={rightChartData}
                         className="h-full min-h-0 w-full min-w-0 flex-1"
                       />
@@ -382,26 +359,81 @@ export function Dashboard() {
                     onDragOver={onCompareDragOver}
                     onDragEnter={() => setDropHover(true)}
                     onDragLeave={() => setDropHover(false)}
-                    className={`flex min-h-0 min-w-0 flex-1 flex-col items-center justify-center rounded-[0.5rem] border-[0.1875rem] border-dashed px-[1.5rem] py-[2rem] text-center transition-colors ${
+                    className={`flex min-h-0 min-w-0 flex-1 flex-col items-center justify-center rounded-[0.5rem] border-[0.1875rem] border-dashed px-[1.5rem] py-[2rem] text-center transition-[border-color,background-color] duration-150 ${
                       dropHover
-                        ? "border-[#2962ff] bg-[#2962ff]/15"
-                        : "border-[#758696]/50 bg-[#131722]"
+                        ? "border-neutral-500 bg-white/[0.06]"
+                        : "border-v-muted/50 bg-v-panel"
                     }`}
                   >
-                    <p className="font-mono text-[0.875rem] font-medium text-[#b2b5be]">
+                    <p className="font-mono text-[1.25rem] font-medium text-v-subtle">
                       Compare zone
                     </p>
-                    <p className="mt-[0.75rem] max-w-[18rem] text-[0.8125rem] leading-relaxed text-[#758696]">
+                    <p className="mt-[0.75rem] max-w-[18rem] text-[1.25rem] leading-relaxed text-v-muted">
                       Drag a spot pair from the list and release here to load
                       Chart B beside Chart A.
                     </p>
                   </div>
                 )}
-              </section>
+                </section>
+              ) : null}
             </div>
           </div>
+          <MultiSymbolChartAnalysis />
         </main>
+
+        <aside className="crypto-sidebar flex w-[34rem] shrink-0 flex-col gap-[1.5rem] border-l-[0.0625rem] border-v-border bg-[#171717] [contain:layout]">
+          <MarketTickerBar
+            selectedSymbols={[
+              leftSymbol,
+              ...(rightSymbol !== null ? [rightSymbol] : []),
+            ]}
+          />
+          <nav className="flex flex-1 flex-col gap-[0.5rem] overflow-y-auto p-[1.25rem]">
+            {MARKETS.map((m, i) => {
+              const onLeft = m.symbol === leftSymbol;
+              const onRight = dualChartsLoaded && m.symbol === rightSymbol;
+              const active = onLeft || onRight;
+              const row = tickerRows[i]!;
+              const pctColor = row.pct >= 0 ? "var(--v-candle-up)" : "var(--v-candle-down)";
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  draggable
+                  onDragStart={onMarketDragStart(m)}
+                  onDragEnd={onListDragEnd}
+                  onClick={() => handleSelectChartA(m)}
+                  className={`flex h-[6.5rem] shrink-0 cursor-grab items-center justify-between gap-[0.75rem] rounded-[0.5rem] px-[1.5rem] text-left transition-colors active:cursor-grabbing ${
+                    active ? "bg-[#474747]" : "bg-[#272727] hover:bg-[#333333]"
+                  }`}
+                >
+                  <span className="flex min-w-0 items-center gap-[0.875rem]">
+                    <CryptoIcon
+                      iconSlug={m.iconSlug}
+                      label={m.label}
+                      className="h-[3.125rem] w-[3.125rem]"
+                    />
+                    <span className="font-mono text-[1.3125rem] font-medium text-foreground">
+                      {m.label.toUpperCase()}
+                    </span>
+                  </span>
+                  <div className="flex flex-col items-end">
+                    <span className="font-mono text-[1.4375rem] font-semibold tabular-nums text-foreground">
+                      {formatPriceUSD(row.price)}
+                    </span>
+                    <span
+                      className="mt-[0.125rem] font-mono text-[1.3125rem] font-light tabular-nums"
+                      style={{ color: pctColor }}
+                    >
+                      {row.pct.toFixed(2)}%
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
       </div>
-    </div>
+    </AppShell>
   );
 }

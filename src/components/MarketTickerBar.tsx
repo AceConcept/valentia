@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { ReactNode } from "react";
 
 import { CryptoIcon } from "@/components/CryptoIcon";
 import { MARKETS } from "@/lib/tokens";
@@ -9,6 +8,16 @@ import { MARKETS } from "@/lib/tokens";
 /** Demo 24h-style moves (placeholder until live quotes). */
 const DEMO_PCT: number[] = [0.99, -0.48, 1.24, -0.87, 3.02, -1.15];
 const DEMO_BASE_PRICE: number[] = [0.4203, 1840.55, 87233, 3120, 182, 616];
+
+const TAB_ICON_TOP_GAINERS = encodeURI("/crypto sidebar icons/top-gainers.svg");
+const TAB_ICON_TRENDING = encodeURI("/crypto sidebar icons/grain.svg");
+const TAB_ROW_ACTION_ICON = encodeURI("/crypto sidebar icons/shape_line.svg");
+
+const TAB_BTN_BASE =
+  "inline-flex h-[3rem] items-center justify-center gap-[0.5625rem] rounded-[0.375rem] border-[0.0625rem] border-solid border-v-border px-[1.25rem] font-mono text-[1.3125rem] font-extralight text-white transition-colors";
+
+const TAB_BTN_ICON =
+  "pointer-events-none h-[1.5625rem] w-[1.5625rem] shrink-0 object-contain brightness-0 invert";
 
 export type TickerRow = {
   symbol: string;
@@ -34,27 +43,6 @@ export function buildRows(): TickerRow[] {
     pct: DEMO_PCT[i % DEMO_PCT.length]!,
     price: DEMO_BASE_PRICE[i % DEMO_BASE_PRICE.length]!,
   }));
-}
-
-function IconButton({
-  children,
-  label,
-  onClick,
-}: {
-  children: ReactNode;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className="inline-flex h-[2rem] w-[2rem] items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border bg-transparent text-v-muted transition-colors hover:bg-v-hover/50"
-    >
-      {children}
-    </button>
-  );
 }
 
 function TickerSegment({ row }: { row: TickerRow }) {
@@ -123,68 +111,6 @@ function MagnifierGlyph() {
   );
 }
 
-function ListGlyph() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M8 6h13" />
-      <path d="M8 12h13" />
-      <path d="M8 18h13" />
-      <path d="M3 6h.01" />
-      <path d="M3 12h.01" />
-      <path d="M3 18h.01" />
-    </svg>
-  );
-}
-
-function TrendingGlyph() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M3 17l6-6 4 4 7-10" />
-      <path d="M14 5h7v7" />
-    </svg>
-  );
-}
-
-function MoreGlyph() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <circle cx="12" cy="5" r="1" />
-      <circle cx="12" cy="12" r="1" />
-      <circle cx="12" cy="19" r="1" />
-    </svg>
-  );
-}
-
 /** Full-width animated marquee strip — place directly below AppHeader. */
 export function MarketTickerStrip() {
   const rows = useMemo(() => buildRows(), []);
@@ -201,7 +127,7 @@ export function MarketTickerStrip() {
 /**
  * Crypto sidebar panel:
  * - selected coin(s) at top
- * - tab buttons + icon buttons
+ * - tab buttons
  * - search input
  */
 export function MarketTickerBar({
@@ -234,7 +160,7 @@ export function MarketTickerBar({
 
   return (
     <div className="w-full min-w-0">
-      <div className="overflow-hidden rounded-[0.5rem] border-[0.0625rem] border-v-border bg-v-panel">
+      <div className="overflow-hidden rounded-[0.5rem]">
         <div className="flex flex-col gap-[1.5rem]">
           <div className="flex flex-col">
             {selectedRows.map((r, idx) => {
@@ -242,7 +168,7 @@ export function MarketTickerBar({
               return (
                 <div
                   key={`selected-${r.symbol}`}
-                  className={`flex h-fit min-h-0 w-full shrink-0 items-center gap-[1rem] px-[1.75rem] py-0 ${
+                  className={`flex h-fit min-h-0 w-full shrink-0 items-center gap-[1.3125rem] px-[1.75rem] py-0 ${
                     idx === selectedRows.length - 1
                       ? ""
                       : "border-b-[0.0625rem] border-v-border"
@@ -260,11 +186,11 @@ export function MarketTickerBar({
                       {r.name}
                     </span>
                     <div className="mt-[0.25rem] flex items-center gap-[0.75rem]">
-                      <span className="font-mono text-[1.3125rem] font-semibold tabular-nums text-foreground">
+                      <span className="font-mono text-[2.25rem] font-semibold tabular-nums text-foreground">
                         {formatPriceUSD(r.price)}
                       </span>
                       <span
-                        className="font-mono text-[1.3125rem] font-semibold tabular-nums"
+                        className="font-mono text-[1.3125rem] font-light tabular-nums"
                         style={{ color: pctColor }}
                       >
                         {r.pct.toFixed(2)}%
@@ -276,45 +202,63 @@ export function MarketTickerBar({
             })}
           </div>
 
-          <div className="flex items-center justify-between gap-[1rem] px-[1.25rem] py-[0.75rem]">
-            <div className="flex items-center gap-[0.5rem]">
+          <div className="flex w-full min-w-0 items-center gap-[0.5rem] px-[1.25rem] py-0">
+            <div className="flex min-w-0 flex-1 items-center gap-[0.5rem]">
               <button
                 type="button"
                 onClick={() => setTab("gainers")}
                 className={[
-                  "inline-flex h-[2.25rem] items-center justify-center rounded-[0.375rem] border-[0.0625rem] px-[0.75rem] font-mono text-[1.3125rem] font-medium transition-colors",
+                  TAB_BTN_BASE,
                   tab === "gainers"
-                    ? "border-v-border bg-v-hover text-foreground"
-                    : "border-v-border bg-transparent text-v-muted hover:bg-v-hover/50",
+                    ? "bg-[#272727]"
+                    : "bg-[#272727] hover:bg-[#333333]",
                 ].join(" ")}
               >
+                {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG from /public */}
+                <img
+                  src={TAB_ICON_TOP_GAINERS}
+                  alt=""
+                  draggable={false}
+                  className={TAB_BTN_ICON}
+                  aria-hidden
+                />
                 Top Gainers
               </button>
               <button
                 type="button"
                 onClick={() => setTab("trending")}
                 className={[
-                  "inline-flex h-[2.25rem] items-center justify-center rounded-[0.375rem] border-[0.0625rem] px-[0.75rem] font-mono text-[1.3125rem] font-medium transition-colors",
+                  TAB_BTN_BASE,
                   tab === "trending"
-                    ? "border-v-border bg-v-hover text-foreground"
-                    : "border-v-border bg-transparent text-v-muted hover:bg-v-hover/50",
+                    ? "bg-[#272727]"
+                    : "bg-[#272727] hover:bg-[#333333]",
                 ].join(" ")}
               >
+                {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG from /public */}
+                <img
+                  src={TAB_ICON_TRENDING}
+                  alt=""
+                  draggable={false}
+                  className={TAB_BTN_ICON}
+                  aria-hidden
+                />
                 Trending
               </button>
             </div>
-
-            <div className="flex items-center gap-[0.5rem]">
-              <IconButton label="List view" onClick={() => setTab("gainers")}>
-                <ListGlyph />
-              </IconButton>
-              <IconButton label="Trending" onClick={() => setTab("trending")}>
-                <TrendingGlyph />
-              </IconButton>
-              <IconButton label="More" onClick={() => setTab(tab)}>
-                <MoreGlyph />
-              </IconButton>
-            </div>
+            <button
+              type="button"
+              aria-label="View options"
+              className="inline-flex h-[3rem] w-[3rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-solid border-v-border bg-[#272727] text-white transition-colors hover:bg-[#333333] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG from /public */}
+              <img
+                src={TAB_ROW_ACTION_ICON}
+                alt=""
+                draggable={false}
+                className={TAB_BTN_ICON}
+                aria-hidden
+              />
+            </button>
           </div>
 
           <div className="px-[1.25rem]">
@@ -326,7 +270,7 @@ export function MarketTickerBar({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search"
-                className="h-[3.5rem] w-full rounded-[0.375rem] border-[0.0625rem] border-v-border bg-transparent pl-[2.75rem] pr-[0.875rem] font-mono text-[1.125rem] font-medium text-foreground placeholder:text-v-muted outline-none focus-visible:outline focus-visible:outline-[0.125rem] focus-visible:outline-offset-[0.125rem] focus-visible:outline-v-muted"
+                className="h-[3.5rem] w-full rounded-[0.375rem] border-[0.0625rem] border-solid border-v-border bg-[#272727] pl-[2.75rem] pr-[0.875rem] font-mono text-[1.125rem] font-light text-foreground placeholder:text-v-muted outline-none focus-visible:border-v-muted focus-visible:outline focus-visible:outline-[0.125rem] focus-visible:outline-offset-[0.125rem] focus-visible:outline-v-muted"
               />
             </div>
           </div>

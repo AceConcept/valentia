@@ -10,8 +10,7 @@ type InsightCard = {
 function IconTrendLevels() {
   return (
     <svg
-      width="20"
-      height="20"
+      className="h-[2.25rem] w-[2.25rem] shrink-0"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -30,8 +29,7 @@ function IconTrendLevels() {
 function IconPatterns() {
   return (
     <svg
-      width="20"
-      height="20"
+      className="h-[2.25rem] w-[2.25rem] shrink-0"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -51,8 +49,7 @@ function IconPatterns() {
 function IconOutside() {
   return (
     <svg
-      width="20"
-      height="20"
+      className="h-[2.25rem] w-[2.25rem] shrink-0"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -72,8 +69,7 @@ function IconOutside() {
 function IconTrading() {
   return (
     <svg
-      width="20"
-      height="20"
+      className="h-[2.25rem] w-[2.25rem] shrink-0"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -92,8 +88,7 @@ function IconTrading() {
 function IconVolume() {
   return (
     <svg
-      width="20"
-      height="20"
+      className="h-[2.25rem] w-[2.25rem] shrink-0"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -109,8 +104,7 @@ function IconVolume() {
 function IconDivergence() {
   return (
     <svg
-      width="20"
-      height="20"
+      className="h-[2.25rem] w-[2.25rem] shrink-0"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -167,56 +161,39 @@ const CARDS: InsightCard[] = [
 const CARD_ROWS: InsightCard[][] = [CARDS.slice(0, 3), CARDS.slice(3, 6)];
 
 const INSIGHT_MARK_BOX =
-  "flex h-[2.25rem] w-[2.25rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border bg-v-panel text-v-subtle";
-
-function TriangleLogo() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d="M12 5.2L20.2 19.8H3.8L12 5.2z" />
-    </svg>
-  );
-}
+  "flex h-[3.5rem] w-[3.5rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border bg-v-panel text-v-subtle";
 
 function InsightCardArticle({ card }: { card: InsightCard }) {
   return (
-    <article className="flex min-w-0 flex-1 flex-col gap-[0.75rem] rounded-[0.5rem] border-[0.0625rem] border-v-border bg-[#161616] p-[1.125rem]">
-      <div className="flex shrink-0 flex-col gap-[0.5rem]">
-        <div className={INSIGHT_MARK_BOX}>
-          <TriangleLogo />
-        </div>
+    <button
+      type="button"
+      className="flex h-[19.75rem] min-w-0 flex-1 cursor-pointer flex-col gap-[1.3125rem] rounded-[0.5rem] border-[0.0625rem] border-v-border bg-[#171717] p-[2.5rem] text-left font-inherit transition-[background-color,border-color] hover:border-v-muted/40 hover:bg-[#1c1c1c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-v-muted/35 active:bg-[#141414]"
+    >
+      <div className="flex min-w-0 items-center gap-[1.3125rem]">
         <div className={INSIGHT_MARK_BOX}>{card.icon}</div>
-      </div>
-      <div className="min-w-0">
-        <p className="text-[0.8125rem] font-medium text-v-subtle">
+        <p className="min-w-0 flex-1 text-[1.3125rem] font-medium leading-tight text-v-subtle">
           {card.category}
         </p>
-        <h3 className="mt-[0.25rem] text-[1.0625rem] font-semibold leading-snug text-foreground">
+      </div>
+      <div className="flex min-w-0 flex-col gap-[1.3125rem]">
+        <h3 className="font-insight text-[1.4375rem] font-semibold leading-snug text-foreground">
           {card.headline}
         </h3>
-        <p className="mt-[0.5rem] text-[0.875rem] leading-relaxed text-v-muted">
+        <p className="font-insight text-[1.3125rem] leading-relaxed text-v-muted">
           {card.body}
         </p>
       </div>
-    </article>
+    </button>
   );
 }
 
 export function MultiSymbolChartAnalysis() {
   return (
     <section className="mt-[1.5rem] flex w-full min-w-0 shrink-0 flex-col gap-[2.5rem] pb-[0.5rem]">
-      <h2 className="w-full shrink-0 text-left text-[0.875rem] font-medium uppercase tracking-[0.12em] text-v-muted">
-        Multi-symbol chart analysis
-      </h2>
       {CARD_ROWS.map((row) => (
         <div
           key={row.map((c) => c.headline).join("-")}
-          className="flex w-full min-w-0 shrink-0 gap-[1.25rem]"
+          className="flex w-full min-w-0 shrink-0 gap-[2.25rem]"
         >
           {row.map((card) => (
             <InsightCardArticle key={card.headline} card={card} />

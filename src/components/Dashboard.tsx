@@ -9,6 +9,7 @@ import { MarketTickerBar, MarketTickerStrip, buildRows, formatPriceUSD } from "@
 import { CandlestickChart } from "@/components/CandlestickChart";
 import { HeaderTradeToolbar } from "@/components/HeaderTradeToolbar";
 import { CryptoIcon } from "@/components/CryptoIcon";
+import { GraphDescriptor } from "@/components/GraphDescriptor";
 import { MultiSymbolChartAnalysis } from "@/components/MultiSymbolChartAnalysis";
 import { SingleTokenChartToolbar } from "@/components/SingleTokenChartToolbar";
 import type { Candle } from "@/lib/candles";
@@ -256,8 +257,8 @@ export function Dashboard() {
       />
       <MarketTickerStrip />
 
-      <div className="flex min-h-0 flex-1">
-        <main className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-[2rem]">
+      <div className="flex min-h-0 flex-1 bg-[#151515]">
+        <main className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto px-[4.375rem] pt-[4.375rem] pb-[2rem]">
           {anyLoading && (
             <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[0.125rem]">
               <p className="font-mono text-[1.25rem] text-v-muted">
@@ -267,39 +268,38 @@ export function Dashboard() {
           )}
           <SingleTokenChartToolbar />
           <div className="flex h-[45rem] min-h-0 shrink-0 flex-col rounded-[0.5rem] border-[0.0625rem] border-v-border bg-v-panel">
-            <div className="border-b-[0.0625rem] border-v-border bg-[color:var(--v-chart-bg)] px-[1.5rem] py-[1rem]">
-              <h2 className="text-[1.25rem] font-medium">
-                {showCompareColumn
-                  ? "Compare — 1h candlesticks"
-                  : "1h candlesticks"}
-              </h2>
-            </div>
-
-            <div className="flex min-h-0 min-w-0 flex-1 flex-row gap-[1rem] p-[1rem]">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-row gap-[1rem] p-0">
               <section
                 className={
                   showCompareColumn
-                    ? "flex min-h-0 min-w-0 flex-[1_1_50%] flex-col"
-                    : "flex min-h-0 min-w-0 flex-1 flex-col"
+                    ? "flex min-h-0 min-w-0 flex-[1_1_50%] flex-col gap-0 bg-[unset]"
+                    : "flex min-h-0 min-w-0 flex-1 flex-col gap-0 bg-[unset]"
                 }
               >
-                <div className="mb-[0.5rem] flex shrink-0 items-center justify-between gap-[0.75rem]">
-                  <h3 className="flex items-center gap-[0.5rem] font-mono text-[1.25rem] font-medium text-v-subtle">
-                    {leftMarket ? (
-                      <CryptoIcon
-                        iconSlug={leftMarket.iconSlug}
-                        label={leftLabel}
-                        className="h-[1.5rem] w-[1.5rem]"
-                      />
-                    ) : null}
-                    {leftSymbol.replace("USDT", "")}/USDT
-                  </h3>
-                  <span className="text-[1.25rem] uppercase tracking-wide text-v-muted">
-                    Chart A
-                  </span>
-                </div>
+                <GraphDescriptor>
+                  <div className="flex min-w-0 items-center gap-[0.75rem]">
+                    <h3 className="flex items-center gap-[0.5rem] font-mono text-[1.25rem] font-medium text-v-subtle">
+                      {leftMarket ? (
+                        <CryptoIcon
+                          iconSlug={leftMarket.iconSlug}
+                          label={leftLabel}
+                          className="h-[1.5rem] w-[1.5rem]"
+                        />
+                      ) : null}
+                      {leftSymbol.replace("USDT", "")}/USDT
+                    </h3>
+                    <span className="text-[1.25rem] uppercase tracking-wide text-v-muted">
+                      Chart A
+                    </span>
+                  </div>
+                  <h2 className="shrink-0 text-[1.25rem] font-medium">
+                    {showCompareColumn
+                      ? "Compare — 1h candlesticks"
+                      : "1h candlesticks"}
+                  </h2>
+                </GraphDescriptor>
                 {leftError ? (
-                  <div className="mb-[0.75rem] rounded-[0.5rem] border-[0.0625rem] border-red-500/30 bg-red-950/35 px-[1rem] py-[0.75rem] font-mono text-[1.25rem] text-red-200">
+                  <div className="rounded-[0.5rem] border-[0.0625rem] border-red-500/30 bg-red-950/35 px-[1rem] py-[0.75rem] font-mono text-[1.25rem] text-red-200">
                     {leftError}
                   </div>
                 ) : null}
@@ -313,11 +313,11 @@ export function Dashboard() {
               </section>
 
               {showCompareColumn ? (
-                <section className="flex min-h-0 min-w-0 flex-[1_1_50%] flex-col border-l-[0.0625rem] border-v-border pl-[1rem]">
+                <section className="flex min-h-0 min-w-0 flex-[1_1_50%] flex-col gap-0 border-l-[0.0625rem] border-v-border bg-[unset] pl-[1rem]">
                 {rightSymbol !== null && rightLabel !== null ? (
                   <>
-                    <div className="mb-[0.5rem] flex min-h-[3.5rem] shrink-0 items-center justify-between gap-[0.75rem]">
-                      <h3 className="flex items-center gap-[0.5rem] font-mono text-[1.25rem] font-medium text-v-subtle">
+                    <GraphDescriptor>
+                      <h3 className="flex min-w-0 items-center gap-[0.5rem] font-mono text-[1.25rem] font-medium text-v-subtle">
                         {rightMarket ? (
                           <CryptoIcon
                             iconSlug={rightMarket.iconSlug}
@@ -327,7 +327,7 @@ export function Dashboard() {
                         ) : null}
                         {rightSymbol.replace("USDT", "")}/USDT
                       </h3>
-                      <div className="flex h-[3.5rem] items-center gap-[0.75rem]">
+                      <div className="flex shrink-0 items-center gap-[0.75rem]">
                         <span className="text-[1.25rem] uppercase tracking-wide text-v-muted">
                           Chart B
                         </span>
@@ -339,9 +339,9 @@ export function Dashboard() {
                           Remove
                         </button>
                       </div>
-                    </div>
+                    </GraphDescriptor>
                     {rightError ? (
-                      <div className="mb-[0.75rem] rounded-[0.5rem] border-[0.0625rem] border-red-500/30 bg-red-950/35 px-[1rem] py-[0.75rem] font-mono text-[1.25rem] text-red-200">
+                      <div className="rounded-[0.5rem] border-[0.0625rem] border-red-500/30 bg-red-950/35 px-[1rem] py-[0.75rem] font-mono text-[1.25rem] text-red-200">
                         {rightError}
                       </div>
                     ) : null}
@@ -383,7 +383,7 @@ export function Dashboard() {
           <MultiSymbolChartAnalysis />
         </main>
 
-        <aside className="crypto-sidebar flex w-[34rem] shrink-0 flex-col gap-[1.5rem] border-l-[0.0625rem] border-v-border bg-[#171717] [contain:layout]">
+        <aside className="crypto-sidebar flex w-[34rem] shrink-0 flex-col gap-[1.5rem] border-l-[0.0625rem] border-v-border bg-[#171717] py-[1.5rem] [contain:layout]">
           <MarketTickerBar
             selectedSymbols={[
               leftSymbol,
@@ -415,7 +415,7 @@ export function Dashboard() {
                       label={m.label}
                       className="h-[3.125rem] w-[3.125rem]"
                     />
-                    <span className="font-mono text-[1.3125rem] font-medium text-foreground">
+                    <span className="font-mono text-[1.3125rem] font-light text-foreground">
                       {m.label.toUpperCase()}
                     </span>
                   </span>

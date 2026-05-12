@@ -31,14 +31,14 @@ export function HeaderTradeToolbar({ onResetCharts }: Props) {
   }, [open]);
 
   const btnBase =
-    "inline-flex h-[var(--v-header-toolbar-btn-h)] min-h-[var(--v-header-toolbar-btn-h)] shrink-0 items-center justify-center gap-[0.375rem] rounded-[0.375rem] border-[0.0625rem] border-v-border bg-transparent px-[0.875rem] text-[1.25rem] font-medium text-foreground transition-colors duration-150 hover:bg-v-hover focus-visible:outline focus-visible:outline-[0.125rem] focus-visible:outline-offset-[0.125rem] focus-visible:outline-v-muted";
+    "inline-flex h-[var(--v-header-toolbar-btn-h)] min-h-[var(--v-header-toolbar-btn-h)] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border bg-[#232323] px-[0.875rem] text-[1.25rem] font-medium text-foreground transition-colors duration-150 hover:bg-v-hover focus-visible:outline focus-visible:outline-[0.125rem] focus-visible:outline-offset-[0.125rem] focus-visible:outline-v-muted";
 
   return (
     <div className="flex shrink-0 items-center gap-[0.75rem]">
       <div className="relative">
         <button
           type="button"
-          className={btnBase}
+          className={`${btnBase} gap-[1.125rem]`}
           aria-expanded={open}
           aria-haspopup="listbox"
           aria-controls="derivatives-accounts-menu"
@@ -49,7 +49,7 @@ export function HeaderTradeToolbar({ onResetCharts }: Props) {
         >
           <span>Derivatives accounts</span>
           <svg
-            className={`h-[1rem] w-[1rem] shrink-0 text-v-muted transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+            className={`h-[1.3125rem] w-[1.3125rem] shrink-0 text-v-muted transition-transform duration-200 ${open ? "rotate-180" : ""}`}
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -108,7 +108,7 @@ export function HeaderTradeToolbar({ onResetCharts }: Props) {
         ) : null}
       </div>
 
-      <button type="button" className={btnBase} onClick={onResetCharts}>
+      <button type="button" className={`${btnBase} gap-[0.5625rem]`} onClick={onResetCharts}>
         {/* eslint-disable-next-line @next/next/no-img-element -- static SVG from /public */}
         <img
           src={RESET_ICON}

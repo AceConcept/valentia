@@ -44,6 +44,8 @@
   --color-v-candle-down: var(--v-candle-down);
   --font-sans: var(--font-ibm-plex-mono), ui-monospace, monospace;
   --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
+  /* Insight cards: Inter (Next sets --font-inter on <html>) */
+  --font-insight: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 html {

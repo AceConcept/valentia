@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono } from "next/font/google";
+import { IBM_Plex_Mono, Inter } from "next/font/google";
 
 import { ScaledViewport } from "@/components/ScaledViewport";
 import "./globals.css";
@@ -8,6 +8,13 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-ibm-plex-mono",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -23,7 +30,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${ibmPlexMono.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${ibmPlexMono.variable} ${inter.variable} h-full antialiased`}
+    >
       <body>
         <ScaledViewport>{children}</ScaledViewport>
       </body>

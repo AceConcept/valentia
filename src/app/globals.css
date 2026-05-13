@@ -23,8 +23,8 @@
   --v-crosshair: #5c5c5c;
   /* Axis / watermark text on chart canvas */
   --v-chart-label: #8a8a8a;
-  /* OHLC — cyan mint up, soft rose down (fits black UI, not legacy teal/red) */
-  --v-candle-up: #5ce1c6;
+  /* OHLC — green up, soft rose down */
+  --v-candle-up: #59e35e;
   --v-candle-down: #ff8b9a;
   /* Header toolbar controls: 56px at design reference (1rem = 16px on artboard) */
   --v-header-toolbar-btn-h: 3.5rem;

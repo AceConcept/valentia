@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 
-type InsightCard = {
+import type { InsightArticlePayload } from "@/lib/insight-view-payload";
+
+export type InsightCard = {
   category: string;
   headline: string;
   body: string;
@@ -119,7 +121,7 @@ function IconDivergence() {
   );
 }
 
-const CARDS: InsightCard[] = [
+const SINGLE_CHART_CARDS: InsightCard[] = [
   {
     category: "Trend & Levels",
     headline: "Doji Spotted",
@@ -158,16 +160,68 @@ const CARDS: InsightCard[] = [
   },
 ];
 
-const CARD_ROWS: InsightCard[][] = [CARDS.slice(0, 3), CARDS.slice(3, 6)];
+function buildCompareChartCards(left: string, right: string): InsightCard[] {
+  return [
+    {
+      category: "Compare",
+      headline: "Side-by-side candles",
+      body: `${left} (Chart A) and ${right} (Chart B) share the same 1h clock, so swing structure, session prints, and local extremes line up for a direct read across both names.`,
+      icon: <IconPatterns />,
+    },
+    {
+      category: "Relative strength",
+      headline: "Who is leading?",
+      body: `Watch how ${right} moves against ${left}: if Chart B strings higher highs while Chart A stalls, it often flags a short rotation into ${right} before the pair mean-reverts.`,
+      icon: <IconTrendLevels />,
+    },
+    {
+      category: "Divergence",
+      headline: "Paths decoupling?",
+      body: `When ${left} prints a higher high but ${right} fails (or the reverse), treat it as a tension build—mean reversion or a fresh leg usually follows whichever chart snaps back first.`,
+      icon: <IconDivergence />,
+    },
+    {
+      category: "Volatility",
+      headline: "Dispersion check",
+      body: `Wider wicks on one chart versus the other in the same window usually mean isolated headline or liquidity stress on that leg—not necessarily the whole ${left}/${right} complex.`,
+      icon: <IconTrading />,
+    },
+    {
+      category: "Volume",
+      headline: "Participation skew",
+      body: "If selling volume clusters on one symbol while the other holds bid depth, fades against the thinner book tend to resolve faster—bias which chart you lean on first.",
+      icon: <IconVolume />,
+    },
+    {
+      category: "Trading",
+      headline: "Pair the thesis",
+      body: `Anchor on ${left} and confirm with ${right}: size only when both agree on direction, or when the laggard catches up with expanding range and cleaner continuation.`,
+      icon: <IconOutside />,
+    },
+  ];
+}
 
 const INSIGHT_MARK_BOX =
   "flex h-[3.5rem] w-[3.5rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border bg-v-panel text-v-subtle";
 
-function InsightCardArticle({ card }: { card: InsightCard }) {
+function InsightCardArticle({
+  card,
+  onOpen,
+}: {
+  card: InsightCard;
+  onOpen?: (article: InsightArticlePayload) => void;
+}) {
   return (
     <button
       type="button"
       className="flex h-[19.75rem] min-w-0 flex-1 cursor-pointer flex-col gap-[1.3125rem] rounded-[0.5rem] border-[0.0625rem] border-v-border bg-[#171717] p-[2.5rem] text-left font-inherit transition-[background-color,border-color] hover:border-v-muted/40 hover:bg-[#1c1c1c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-v-muted/35 active:bg-[#141414]"
+      onClick={() =>
+        onOpen?.({
+          category: card.category,
+          headline: card.headline,
+          body: card.body,
+        })
+      }
     >
       <div className="flex min-w-0 items-center gap-[1.3125rem]">
         <div className={INSIGHT_MARK_BOX}>{card.icon}</div>
@@ -187,16 +241,42 @@ function InsightCardArticle({ card }: { card: InsightCard }) {
   );
 }
 
-export function MultiSymbolChartAnalysis() {
+export type MultiSymbolChartAnalysisProps = {
+  /** When true, Chart B is loaded — show compare-focused insight cards. */
+  dualChart?: boolean;
+  chartALabel?: string;
+  chartBLabel?: string;
+  /** Persist chart + open `/insight` with article text (markets dashboard only). */
+  onInsightArticleOpen?: (article: InsightArticlePayload) => void;
+};
+
+export function MultiSymbolChartAnalysis({
+  dualChart = false,
+  chartALabel = "Chart A",
+  chartBLabel = "Chart B",
+  onInsightArticleOpen,
+}: MultiSymbolChartAnalysisProps) {
+  const cards: InsightCard[] = dualChart
+    ? buildCompareChartCards(chartALabel, chartBLabel)
+    : SINGLE_CHART_CARDS;
+  const cardRows: InsightCard[][] = [
+    cards.slice(0, 3),
+    cards.slice(3, 6),
+  ];
+
   return (
     <section className="mt-[1.5rem] flex w-full min-w-0 shrink-0 flex-col gap-[2.5rem] pb-[0.5rem]">
-      {CARD_ROWS.map((row) => (
+      {cardRows.map((row) => (
         <div
           key={row.map((c) => c.headline).join("-")}
           className="flex w-full min-w-0 shrink-0 gap-[2.25rem]"
         >
           {row.map((card) => (
-            <InsightCardArticle key={card.headline} card={card} />
+            <InsightCardArticle
+              key={card.headline}
+              card={card}
+              onOpen={onInsightArticleOpen}
+            />
           ))}
         </div>
       ))}

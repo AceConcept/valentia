@@ -115,7 +115,7 @@ export function CandlestickChart({ candles, className }: Props) {
     const borderColor = cssVar("--v-border", "#2a2a2a");
     const crosshairColor = cssVar("--v-crosshair", "#5c5c5c");
     const axisText = cssVar("--v-chart-label", "#8a8a8a");
-    const candleUp = cssVar("--v-candle-up", "#5ce1c6");
+    const candleUp = cssVar("--v-candle-up", "#59e35e");
     const candleDown = cssVar("--v-candle-down", "#ff8b9a");
 
     const chart = createChart(el, {

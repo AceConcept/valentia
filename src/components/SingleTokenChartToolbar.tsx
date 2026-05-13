@@ -10,7 +10,7 @@ export function SingleTokenChartToolbar() {
       <div className="flex shrink-0 items-center gap-[0.75rem]">
         <button type="button" className={`${TOOLBAR_BTN} gap-[0.25rem]`}>
           <span
-            className="h-[0.5rem] w-[0.5rem] shrink-0 rounded-full bg-[var(--v-candle-up)] shadow-[0_0_0.375rem_rgba(92,225,198,0.45)]"
+            className="h-[0.5rem] w-[0.5rem] shrink-0 rounded-full bg-[var(--v-candle-up)] shadow-[0_0_0.375rem_rgba(89,227,94,0.45)]"
             aria-hidden
           />
           <span className="normal-case tracking-normal">Live</span>

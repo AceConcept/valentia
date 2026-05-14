@@ -204,6 +204,13 @@ function buildCompareChartCards(left: string, right: string): InsightCard[] {
 const INSIGHT_MARK_BOX =
   "flex h-[3.5rem] w-[3.5rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border bg-v-panel text-v-subtle";
 
+const INSIGHT_CARD_BODY_MAX_CHARS = 100;
+
+function truncateInsightDisplayText(text: string, maxChars: number): string {
+  if (text.length <= maxChars) return text;
+  return `${text.slice(0, maxChars)}…`;
+}
+
 function InsightCardArticle({
   card,
   onOpen,
@@ -211,10 +218,15 @@ function InsightCardArticle({
   card: InsightCard;
   onOpen?: (article: InsightArticlePayload) => void;
 }) {
+  const bodyPreview = truncateInsightDisplayText(
+    card.body,
+    INSIGHT_CARD_BODY_MAX_CHARS,
+  );
+
   return (
     <button
       type="button"
-      className="flex h-[19.75rem] min-w-0 flex-1 cursor-pointer flex-col gap-[1.3125rem] rounded-[0.5rem] border-[0.0625rem] border-v-border bg-[#171717] p-[2.5rem] text-left font-inherit transition-[background-color,border-color] hover:border-v-muted/40 hover:bg-[#1c1c1c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-v-muted/35 active:bg-[#141414]"
+      className="flex min-h-0 min-w-0 flex-1 cursor-pointer flex-col items-stretch gap-[1.3125rem] rounded-[0.25rem] border-[0.0625rem] border-v-border bg-[#171717] p-[2.5rem] text-left font-inherit transition-[background-color,border-color] hover:border-v-muted/40 hover:bg-[#1c1c1c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-v-muted/35 active:bg-[#141414]"
       onClick={() =>
         onOpen?.({
           category: card.category,
@@ -223,6 +235,9 @@ function InsightCardArticle({
         })
       }
     >
+      <span className="self-start font-insight text-[0.8125rem] font-semibold uppercase tracking-[0.06em] text-v-muted">
+        View Strategy
+      </span>
       <div className="flex min-w-0 items-center gap-[1.3125rem]">
         <div className={INSIGHT_MARK_BOX}>{card.icon}</div>
         <p className="min-w-0 flex-1 text-[1.3125rem] font-medium leading-tight text-v-subtle">
@@ -234,7 +249,7 @@ function InsightCardArticle({
           {card.headline}
         </h3>
         <p className="font-insight text-[1.3125rem] leading-relaxed text-v-muted">
-          {card.body}
+          {bodyPreview}
         </p>
       </div>
     </button>
@@ -265,11 +280,11 @@ export function MultiSymbolChartAnalysis({
   ];
 
   return (
-    <section className="mt-[1.5rem] flex w-full min-w-0 shrink-0 flex-col gap-[2.5rem] pb-[0.5rem]">
+    <section className="mt-[2.5rem] flex w-full min-w-0 shrink-0 flex-col gap-[2.5rem] pb-[0.5rem]">
       {cardRows.map((row) => (
         <div
           key={row.map((c) => c.headline).join("-")}
-          className="flex w-full min-w-0 shrink-0 gap-[2.25rem]"
+          className="flex w-full min-w-0 shrink-0 items-start gap-[2.25rem]"
         >
           {row.map((card) => (
             <InsightCardArticle

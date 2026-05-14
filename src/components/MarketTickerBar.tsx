@@ -3,18 +3,26 @@
 import { useMemo, useState } from "react";
 
 import { CryptoIcon } from "@/components/CryptoIcon";
+import {
+  TopGainersTabLeadingIcon,
+  TrendingTabLeadingIcon,
+} from "@/components/SidebarTickerTabLeadingIcons";
 import { MARKETS } from "@/lib/tokens";
 
 /** Demo 24h-style moves (placeholder until live quotes). */
-const DEMO_PCT: number[] = [0.99, -0.48, 1.24, -0.87, 3.02, -1.15];
-const DEMO_BASE_PRICE: number[] = [0.4203, 1840.55, 87233, 3120, 182, 616];
+const DEMO_PCT: number[] = [
+  0.99, -0.48, 1.24, -0.87, 3.02, -1.15, 0.62, -2.1, 1.88, -0.33, 0.41, 2.67, -1.82, 0.15, -0.95, 1.05,
+  -0.72, 0.88, -1.4, 2.31, -0.21, 1.67, -3.02, 0.54, -1.11, 0.73, 2.05, -0.66, 1.12, -0.38,
+];
+const DEMO_BASE_PRICE: number[] = [
+  97250, 3450, 178, 685, 2.18, 0.158, 0.92, 4.85, 36.2, 24.5, 8.1, 2.95, 185, 0.312, 1.85, 0.42,
+  0.28, 12.4, 0.095, 3.65, 8.9, 22.1, 1.42, 0.18, 2.55, 0.000018, 14.2, 5.8, 0.82, 1.12,
+];
 
-const TAB_ICON_TOP_GAINERS = encodeURI("/crypto sidebar icons/top-gainers.svg");
-const TAB_ICON_TRENDING = encodeURI("/crypto sidebar icons/grain.svg");
 const TAB_ROW_ACTION_ICON = encodeURI("/crypto sidebar icons/shape_line.svg");
 
 const TAB_BTN_BASE =
-  "inline-flex h-[3rem] items-center justify-center gap-[0.5625rem] rounded-[0.375rem] border-[0.0625rem] border-solid border-v-border px-[1.25rem] font-mono text-[1.3125rem] font-extralight text-white transition-colors";
+  "inline-flex h-[3rem] items-center justify-center gap-[0.5625rem] rounded-[0.375rem] border-[0.0625rem] border-solid border-v-border px-[1.25rem] font-mono text-[1.3125rem] font-extralight transition-colors";
 
 const TAB_BTN_ICON =
   "pointer-events-none h-[1.5625rem] w-[1.5625rem] shrink-0 object-contain brightness-0 invert";
@@ -132,10 +140,21 @@ export function MarketTickerStrip() {
  */
 export function MarketTickerBar({
   selectedSymbols,
+  listTab: listTabProp,
+  onListTabChange,
 }: {
   selectedSymbols: string[];
+  /** With `onListTabChange`, controls sidebar list filtering in the parent (e.g. Dashboard). */
+  listTab?: "gainers" | "trending";
+  onListTabChange?: (tab: "gainers" | "trending") => void;
 }) {
-  const [tab, setTab] = useState<"gainers" | "trending">("gainers");
+  const [listTabInner, setListTabInner] = useState<"gainers" | "trending">("gainers");
+  const isControlled = listTabProp !== undefined && onListTabChange !== undefined;
+  const listTab = isControlled ? listTabProp : listTabInner;
+  const setListTab = (t: "gainers" | "trending") => {
+    if (isControlled) onListTabChange!(t);
+    else setListTabInner(t);
+  };
   const [query, setQuery] = useState("");
 
   const rows = useMemo(() => buildRows(), []);
@@ -168,10 +187,8 @@ export function MarketTickerBar({
               return (
                 <div
                   key={`selected-${r.symbol}`}
-                  className={`flex h-fit min-h-0 w-full shrink-0 items-center gap-[1.3125rem] px-[1.75rem] py-0 ${
-                    idx === selectedRows.length - 1
-                      ? ""
-                      : "border-b-[0.0625rem] border-v-border"
+                  className={`flex h-fit min-h-0 w-full shrink-0 items-center gap-[1.3125rem] px-[1.75rem] ${
+                    idx > 0 ? "pb-0 pt-[1.5rem]" : "py-0"
                   }`}
                 >
                   <div className="flex h-[4.875rem] w-[4.875rem] shrink-0 items-center justify-center rounded-full bg-[#2847ff]">
@@ -206,43 +223,29 @@ export function MarketTickerBar({
             <div className="flex min-w-0 flex-1 items-center gap-[0.5rem]">
               <button
                 type="button"
-                onClick={() => setTab("gainers")}
-                className={[
-                  TAB_BTN_BASE,
-                  tab === "gainers"
-                    ? "bg-[#272727]"
-                    : "bg-[#272727] hover:bg-[#333333]",
-                ].join(" ")}
+                aria-pressed={listTab === "gainers"}
+                onClick={() => setListTab("gainers")}
+                className={["group", TAB_BTN_BASE, "bg-[#272727] hover:bg-[#333333]"].join(
+                  " ",
+                )}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG from /public */}
-                <img
-                  src={TAB_ICON_TOP_GAINERS}
-                  alt=""
-                  draggable={false}
-                  className={TAB_BTN_ICON}
-                  aria-hidden
-                />
-                Top Gainers
+                <TopGainersTabLeadingIcon />
+                <span className="text-white/70 transition-colors group-hover:text-white group-focus-visible:text-white">
+                  Top Gainers
+                </span>
               </button>
               <button
                 type="button"
-                onClick={() => setTab("trending")}
-                className={[
-                  TAB_BTN_BASE,
-                  tab === "trending"
-                    ? "bg-[#272727]"
-                    : "bg-[#272727] hover:bg-[#333333]",
-                ].join(" ")}
+                aria-pressed={listTab === "trending"}
+                onClick={() => setListTab("trending")}
+                className={["group", TAB_BTN_BASE, "bg-[#272727] hover:bg-[#333333]"].join(
+                  " ",
+                )}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG from /public */}
-                <img
-                  src={TAB_ICON_TRENDING}
-                  alt=""
-                  draggable={false}
-                  className={TAB_BTN_ICON}
-                  aria-hidden
-                />
-                Trending
+                <TrendingTabLeadingIcon />
+                <span className="text-white/70 transition-colors group-hover:text-white group-focus-visible:text-white">
+                  Trending
+                </span>
               </button>
             </div>
             <button

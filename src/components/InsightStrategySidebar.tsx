@@ -10,16 +10,6 @@ import {
 } from "@/components/MarketTickerBar";
 import { MARKETS, marketBySymbol, type Market } from "@/lib/tokens";
 
-const TAB_ICON_TOP_GAINERS = encodeURI("/crypto sidebar icons/top-gainers.svg");
-const TAB_ICON_TRENDING = encodeURI("/crypto sidebar icons/grain.svg");
-const TAB_ROW_ACTION_ICON = encodeURI("/crypto sidebar icons/shape_line.svg");
-
-const TAB_BTN_BASE =
-  "inline-flex h-[3rem] items-center justify-center gap-[0.5625rem] rounded-[0.375rem] border-[0.0625rem] border-solid border-v-border px-[1.25rem] font-mono text-[1.3125rem] font-extralight text-white transition-colors";
-
-const TAB_BTN_ICON =
-  "pointer-events-none h-[1.5625rem] w-[1.5625rem] shrink-0 object-contain brightness-0 invert";
-
 const ACCENT = "text-[#7ab8ff]";
 
 function MagnifierGlyph() {
@@ -146,7 +136,6 @@ export function InsightStrategySidebar({
   rightSymbol,
   rightLabel,
 }: Props) {
-  const [tab, setTab] = useState<"gainers" | "trending">("gainers");
   const [query, setQuery] = useState("");
   const [open1, setOpen1] = useState(true);
   const [open2, setOpen2] = useState(false);
@@ -212,75 +201,6 @@ export function InsightStrategySidebar({
             className="inline-flex h-[3rem] w-[3rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border bg-[#272727] text-foreground transition-colors hover:bg-[#333333] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
           >
             <DownloadGlyph />
-          </button>
-        </div>
-
-        <div className="flex w-full min-w-0 shrink-0 items-center gap-[0.5rem]">
-          <div className="flex min-w-0 flex-1 items-center gap-[0.5rem]">
-            <button
-              type="button"
-              onClick={() => setTab("gainers")}
-              className={[
-                TAB_BTN_BASE,
-                tab === "gainers" ? "bg-[#272727]" : "bg-[#272727] hover:bg-[#333333]",
-              ].join(" ")}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG from /public */}
-              <img
-                src={TAB_ICON_TOP_GAINERS}
-                alt=""
-                draggable={false}
-                className={TAB_BTN_ICON}
-                aria-hidden
-              />
-              Top Gainers
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab("trending")}
-              className={[
-                TAB_BTN_BASE,
-                tab === "trending" ? "bg-[#272727]" : "bg-[#272727] hover:bg-[#333333]",
-              ].join(" ")}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG from /public */}
-              <img
-                src={TAB_ICON_TRENDING}
-                alt=""
-                draggable={false}
-                className={TAB_BTN_ICON}
-                aria-hidden
-              />
-              Trending
-            </button>
-          </div>
-          <button
-            type="button"
-            aria-label="List view"
-            className="inline-flex h-[3rem] w-[3rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-solid border-v-border bg-[#272727] text-white transition-colors hover:bg-[#333333] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={TAB_ROW_ACTION_ICON}
-              alt=""
-              draggable={false}
-              className={TAB_BTN_ICON}
-              aria-hidden
-            />
-          </button>
-          <button
-            type="button"
-            aria-label="Chart layout"
-            className="inline-flex h-[3rem] w-[3rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-solid border-v-border bg-[#272727] text-white transition-colors hover:bg-[#333333] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={TAB_ICON_TRENDING}
-              alt=""
-              draggable={false}
-              className={TAB_BTN_ICON}
-              aria-hidden
-            />
           </button>
         </div>
 

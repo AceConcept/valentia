@@ -79,17 +79,17 @@ function ChartDescriptor24hHighLow({
 }) {
   const ready = !loading && high !== null && low !== null;
   return (
-    <div className="flex w-[455px] shrink-0 items-center justify-end gap-[80px]">
-      <div className="flex flex-col items-end gap-0">
-        <span className="font-mono text-[1.3125rem] font-normal uppercase leading-[24px] tracking-[0.06em] text-v-muted">
+    <div className="flex w-[455px] shrink-0 items-center justify-end gap-[80px] pl-[0.5rem]">
+      <div className="flex flex-col items-end gap-[0.5rem]">
+        <span className="font-mono text-base font-normal uppercase leading-[24px] tracking-[0.06em] text-v-muted">
           24h high
         </span>
         <span className="font-mono text-[1.75rem] font-extralight tabular-nums leading-none align-middle text-foreground">
           {ready ? formatUsdTwoDecimals(high) : "—"}
         </span>
       </div>
-      <div className="flex flex-col items-end gap-0">
-        <span className="font-mono text-[1.3125rem] font-normal uppercase leading-none tracking-[0.06em] text-v-muted h-[48px]">
+      <div className="flex flex-col items-end gap-[0.5rem]">
+        <span className="font-mono text-base font-normal uppercase leading-none tracking-[0.06em] text-v-muted h-fit">
           24h low
         </span>
         <span className="font-mono text-[1.75rem] font-extralight tabular-nums leading-none align-middle text-foreground">
@@ -170,6 +170,11 @@ export function Dashboard({
   );
   /** True while dragging from the spot list so the compare column exists in the DOM (drop target). */
   const [listDragActive, setListDragActive] = useState(false);
+
+  /** Sidebar list filter: Top Gainers = same “green” threshold as row styling (`pct >= 0`). */
+  const [sidebarListTab, setSidebarListTab] = useState<"gainers" | "trending">(
+    "gainers",
+  );
 
   const [leftCandles, setLeftCandles] = useState<Candle[]>(
     () => chartSnap?.leftCandles ?? [],
@@ -298,6 +303,11 @@ export function Dashboard({
   const showCompareColumn =
     compareZoneOpen || dualChartsLoaded || listDragActive;
   const tickerRows = useMemo(() => buildRows(), []);
+  const sidebarMarkets = useMemo(() => {
+    if (sidebarListTab === "trending") return [...MARKETS];
+    const pctBySymbol = new Map(tickerRows.map((r) => [r.symbol, r.pct]));
+    return MARKETS.filter((m) => (pctBySymbol.get(m.symbol) ?? 0) >= 0);
+  }, [sidebarListTab, tickerRows]);
   const leftTickerRow = useMemo(
     () => tickerRows.find((r) => r.symbol === leftSymbol) ?? tickerRows[0]!,
     [tickerRows, leftSymbol],
@@ -454,7 +464,10 @@ export function Dashboard({
       <MarketTickerStrip />
 
       <div className="flex min-h-0 flex-1 bg-[#151515]">
-        <main className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-[rgba(13,13,13,1)] px-[4.375rem] pt-[4.375rem] pb-[2rem]">
+        <main
+          className="v-dashboard-main-scroll relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-[rgba(13,13,13,1)] px-[56px] pt-[56px] pb-[2rem]"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
           {anyLoading && (
             <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[0.125rem]">
               <p className="font-mono text-[1.25rem] text-v-muted">
@@ -462,13 +475,15 @@ export function Dashboard({
               </p>
             </div>
           )}
-          <SingleTokenChartToolbar />
-          <div className="flex h-[45rem] min-h-0 shrink-0 flex-col rounded-[0.5rem] border-[0.0625rem] border-v-border bg-v-panel">
+          <SingleTokenChartToolbar multiToken={dualChartsLoaded} />
+          <div className="flex h-[45rem] min-h-0 shrink-0 flex-col rounded-[0.5rem] bg-v-panel">
             <div className="flex min-h-0 min-w-0 flex-1 flex-row gap-[1rem] p-0">
               <section
                 className={
                   showCompareColumn
-                    ? "flex min-h-0 min-w-0 flex-[1_1_50%] flex-col gap-0 bg-[unset]"
+                    ? dualChartsLoaded
+                      ? "flex min-h-0 min-w-0 flex-[1_1_50%] flex-col gap-0 bg-[unset]"
+                      : "flex min-h-0 min-w-0 flex-[1_1_68%] flex-col gap-0 bg-[unset]"
                     : "flex min-h-0 min-w-0 flex-1 flex-col gap-0 bg-[unset]"
                 }
               >
@@ -497,7 +512,13 @@ export function Dashboard({
               </section>
 
               {showCompareColumn ? (
-                <section className="flex min-h-0 min-w-0 flex-[1_1_50%] flex-col gap-0 border-l-[0.0625rem] border-v-border bg-[unset] pl-[1rem]">
+                <section
+                  className={
+                    dualChartsLoaded
+                      ? "flex min-h-0 min-w-0 flex-[1_1_50%] flex-col gap-0 bg-[unset]"
+                      : "flex min-h-0 min-w-0 flex-[1_1_32%] flex-col gap-0 bg-[unset]"
+                  }
+                >
                 {rightSymbol !== null && rightLabel !== null ? (
                   <>
                     <GraphDescriptor>
@@ -515,7 +536,7 @@ export function Dashboard({
                           disabled={chartFrozen}
                           onClick={clearCompareChart}
                           aria-label="Remove compare chart"
-                          className="inline-flex h-[2.25rem] w-[2.25rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border text-v-muted transition-colors hover:border-v-muted hover:text-v-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-v-muted/35 disabled:pointer-events-none disabled:opacity-40"
+                          className="inline-flex h-[2.25rem] w-[2.25rem] shrink-0 items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-white/60 text-white/60 transition-colors hover:border-white/60 hover:text-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 disabled:pointer-events-none disabled:opacity-40"
                         >
                           <svg
                             className="h-[1.125rem] w-[1.125rem]"
@@ -569,7 +590,7 @@ export function Dashboard({
                     <p className="font-mono text-[1.25rem] font-medium text-v-subtle">
                       Compare zone
                     </p>
-                    <p className="mt-[0.75rem] max-w-[18rem] text-[1.25rem] leading-relaxed text-v-muted">
+                    <p className="mt-[0.75rem] max-w-full text-[1.25rem] leading-relaxed text-v-muted">
                       Drag a spot pair from the list and release here to load
                       Chart B beside Chart A.
                     </p>
@@ -611,7 +632,7 @@ export function Dashboard({
         </main>
 
         <aside
-          className="crypto-sidebar flex min-h-0 w-[34rem] shrink-0 flex-col gap-[1.5rem] border-l-[0.0625rem] border-v-border bg-[#171717] py-[1.5rem] [contain:layout]"
+          className="crypto-sidebar flex min-h-0 w-[612px] shrink-0 flex-col gap-[1.5rem] border-l-[0.0625rem] border-v-border bg-[#171717] py-[1.5rem] [contain:layout]"
         >
           {chartFrozen ? (
             <InsightStrategySidebar
@@ -627,13 +648,16 @@ export function Dashboard({
                   leftSymbol,
                   ...(rightSymbol !== null ? [rightSymbol] : []),
                 ]}
+                listTab={sidebarListTab}
+                onListTabChange={setSidebarListTab}
               />
               <nav className="flex flex-1 flex-col gap-[0.5rem] overflow-y-auto p-[1.25rem]">
-                {MARKETS.map((m, i) => {
+                {sidebarMarkets.map((m) => {
                   const onLeft = m.symbol === leftSymbol;
                   const onRight = dualChartsLoaded && m.symbol === rightSymbol;
                   const active = onLeft || onRight;
-                  const row = tickerRows[i]!;
+                  const row =
+                    tickerRows.find((r) => r.symbol === m.symbol) ?? tickerRows[0]!;
                   const pctColor = row.pct >= 0 ? "var(--v-candle-up)" : "var(--v-candle-down)";
                   return (
                     <button

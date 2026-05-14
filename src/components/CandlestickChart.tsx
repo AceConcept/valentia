@@ -11,6 +11,9 @@ import {
 } from "lightweight-charts";
 import { useEffect, useRef, useState } from "react";
 
+/** Candle plot + chart container (matches GraphDescriptor bar). */
+const CHART_CANVAS_BG = "#1b1b1b";
+
 /** Design space: `html { font-size: 16px; }` — rem is stable; stage is scaled via CSS transform. */
 const DESIGN_ROOT_PX = 16;
 
@@ -110,8 +113,8 @@ export function CandlestickChart({ candles, className }: Props) {
       Math.max(1, Math.round(dpx(1))),
     ) as 1 | 2 | 3 | 4;
 
-    const chartBg = cssVar("--v-chart-bg", "#0a0a0a");
-    const gridColor = cssVar("--v-grid", "#1c1c1c");
+    const chartBg = CHART_CANVAS_BG;
+    const gridColor = cssVar("--v-grid", "#3d3d3d");
     const borderColor = cssVar("--v-border", "#2a2a2a");
     const crosshairColor = cssVar("--v-crosshair", "#5c5c5c");
     const axisText = cssVar("--v-chart-label", "#8a8a8a");
@@ -253,7 +256,10 @@ export function CandlestickChart({ candles, className }: Props) {
           </span>
         </div>
       ) : null}
-      <div ref={containerRef} className="min-h-0 w-full min-w-0 flex-1" />
+      <div
+        ref={containerRef}
+        className="min-h-0 w-full min-w-0 flex-1 bg-[#1b1b1b]"
+      />
     </div>
   );
 }

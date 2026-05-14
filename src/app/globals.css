@@ -19,7 +19,9 @@
   --v-subtle: #b8b8b8;
   --v-hover: #1a1a1a;
   --v-chart-bg: #0a0a0a;
-  --v-grid: #1c1c1c;
+  /* Chart grid (vert + horz) — same tone, readable on #1b1b1b canvas */
+  --v-grid: #3d3d3d;
+  --v-grid-horz: #3d3d3d;
   --v-crosshair: #5c5c5c;
   /* Axis / watermark text on chart canvas */
   --v-chart-label: #8a8a8a;
@@ -92,6 +94,26 @@ body {
   box-shadow: 0 0 0 0.0625rem var(--v-border);
 }
 
+/* Scrollable regions: keep overflow; hide visible scrollbar (Win/WebKit + Firefox). */
+.v-dashboard-main-scroll,
+.v-hide-scrollbar {
+  scrollbar-width: none; /* Firefox + Chromium 121+ */
+  -ms-overflow-style: none; /* legacy Edge */
+}
+
+.v-dashboard-main-scroll::-webkit-scrollbar,
+.v-hide-scrollbar::-webkit-scrollbar {
+  /* Classic WebKit/Blink — width/height 0 is more reliable than display:none */
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+.v-dashboard-main-scroll::-webkit-scrollbar-corner,
+.v-hide-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* —— Market ticker (under AppHeader): seamless R→L marquee —— */
 @keyframes market-ticker-scroll {
   from {
@@ -117,7 +139,7 @@ body {
 .market-ticker-track {
   display: flex;
   width: max-content;
-  animation: market-ticker-scroll 48s linear infinite;
+  animation: market-ticker-scroll 96s linear infinite;
   will-change: transform;
 }
 

@@ -8,6 +8,40 @@ export type InsightArticlePayload = {
   body: string;
 };
 
+/** Longer, readable blurb for the article "lens" — keys are lowercased category labels. */
+const INSIGHT_CATEGORY_DESCRIPTION_BY_KEY: Record<string, string> = {
+  "trend & levels":
+    "Trend and key levels tell you where the market has already agreed on value: breaks, holds, and failed breaks there often matter more than isolated candle shapes alone.",
+  "patterns & shapes":
+    "Classic chart formations and candlestick clusters summarize repeated behavior; treat them as hypotheses to confirm with follow-through, volume, and where price sits relative to nearby structure.",
+  "outside influences":
+    "Headlines, policy, and cross-asset flows can temporarily override pure technicals; this tag means the write-up weighs how those forces might accelerate, blunt, or invert what the tape is implying.",
+  trading:
+    "Execution-focused read: entries, invalidation, and how aggressive the tape is on retests—useful when you care less about naming the pattern and more about whether the next few handles reward risk.",
+  volume:
+    "Volume and depth describe who is participating and at what prices: absorption, dry-ups, and spikes often flag where control shifts even before price prints a clean breakout or reversal.",
+  "inter-market":
+    "Relates this symbol to peers or related markets (majors, ratios, indices). Use it when leadership, lag, or correlation is part of the thesis—not only the single-chart microstructure.",
+  compare:
+    "Compare-mode insight: the same clock and window across two charts so you can judge relative strength, divergent structure, and which name is doing the heavy lifting in the move.",
+  "relative strength":
+    "Who is leading the pair on this timeframe: streaking highs, stalled pullbacks, and which chart is making the cleaner impulse all feed into whether rotation or mean reversion is the cleaner base case.",
+  divergence:
+    "When paths between related charts stop agreeing—one makes extremes the other won’t—that tension often resolves with catch-up, mean reversion, or a fresh leg once one side snaps back into line.",
+  volatility:
+    "Range expansion, wick asymmetry, and one-off spikes versus the other leg of a pair; helps separate shared macro moves from stress that is concentrated in a single name or venue.",
+};
+
+/**
+ * Human-readable description for the insight category strip (not just the short label).
+ */
+export function descriptionForInsightArticleCategory(category: string): string {
+  const key = category.trim().toLowerCase();
+  const hit = INSIGHT_CATEGORY_DESCRIPTION_BY_KEY[key];
+  if (hit) return hit;
+  return `This note is filed under "${category.trim()}": read it as the editorial lens for the headline and body below—how the authors want you to weight context, timeframe, and conflict with other signals.`;
+}
+
 export type FrozenChartSnapshot = {
   v: 1;
   leftSymbol: string;

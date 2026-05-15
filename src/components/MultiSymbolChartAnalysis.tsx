@@ -223,36 +223,40 @@ function InsightCardArticle({
     INSIGHT_CARD_BODY_MAX_CHARS,
   );
 
+  const openArticle = () => {
+    onOpen?.({
+      category: card.category,
+      headline: card.headline,
+      body: card.body,
+    });
+  };
+
   return (
-    <button
-      type="button"
-      className="flex min-h-0 min-w-0 flex-1 cursor-pointer flex-col items-stretch gap-[1.3125rem] rounded-[0.25rem] border-[0.0625rem] border-v-border bg-[#171717] p-[2.5rem] text-left font-inherit transition-[background-color,border-color] hover:border-v-muted/40 hover:bg-[#1c1c1c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-v-muted/35 active:bg-[#141414]"
-      onClick={() =>
-        onOpen?.({
-          category: card.category,
-          headline: card.headline,
-          body: card.body,
-        })
-      }
-    >
-      <span className="self-start font-insight text-[0.8125rem] font-semibold uppercase tracking-[0.06em] text-v-muted">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-stretch gap-[1.3125rem] rounded-[0.25rem] border-[0.0625rem] border-v-border bg-[#171717] px-[2.5rem] pt-[2.5rem] pb-[30px] text-left">
+      <div className="flex min-w-0 flex-1 flex-col gap-[1.3125rem]">
+        <div className="flex min-w-0 items-center gap-[1.3125rem]">
+          <div className={INSIGHT_MARK_BOX}>{card.icon}</div>
+          <p className="min-w-0 flex-1 font-mono text-[1.3125rem] font-medium leading-tight text-v-subtle">
+            {card.category}
+          </p>
+        </div>
+        <div className="flex min-w-0 flex-col gap-[1.3125rem]">
+          <h3 className="font-mono text-[1.4375rem] font-semibold leading-snug text-foreground">
+            {card.headline}
+          </h3>
+          <p className="font-insight text-[1.3125rem] leading-relaxed text-v-muted">
+            {bodyPreview}
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={openArticle}
+        className="mt-auto inline-flex w-full shrink-0 cursor-pointer items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border bg-[#272727] px-[1.25rem] py-[0.875rem] font-mono text-[0.8125rem] font-semibold uppercase tracking-[0.06em] text-v-muted transition-[background-color,border-color,color] hover:border-v-muted/40 hover:bg-[#333333] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-v-muted/35 active:bg-[#222222]"
+      >
         View Strategy
-      </span>
-      <div className="flex min-w-0 items-center gap-[1.3125rem]">
-        <div className={INSIGHT_MARK_BOX}>{card.icon}</div>
-        <p className="min-w-0 flex-1 text-[1.3125rem] font-medium leading-tight text-v-subtle">
-          {card.category}
-        </p>
-      </div>
-      <div className="flex min-w-0 flex-col gap-[1.3125rem]">
-        <h3 className="font-insight text-[1.4375rem] font-semibold leading-snug text-foreground">
-          {card.headline}
-        </h3>
-        <p className="font-insight text-[1.3125rem] leading-relaxed text-v-muted">
-          {bodyPreview}
-        </p>
-      </div>
-    </button>
+      </button>
+    </div>
   );
 }
 

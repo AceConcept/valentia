@@ -20,10 +20,10 @@ const DESIGN_ROOT_PX = 16;
 /** Axis / layout text — minimum 20 design px (1.25rem at 16px root). */
 const DESIGN_AXIS_FONT_PX = 20;
 
-/** Library default bar gap is ~6px at 16px root; higher = wider candle bodies. */
-const DESIGN_BAR_SPACING = 12;
+/** Library default bar gap is ~6px at 16px root; keep modest so ~150 bars can fit typical chart width. */
+const DESIGN_BAR_SPACING = 5;
 /** Floors how narrow bars can get when zooming in (library default 0.5). */
-const DESIGN_MIN_BAR_SPACING = 2;
+const DESIGN_MIN_BAR_SPACING = 0.75;
 
 type Props = {
   candles: CandlestickData<Time>[];
@@ -54,19 +54,21 @@ function cssVar(name: string, fallback: string): string {
 }
 
 /**
- * Default view is heavily zoomed vs `fitContent()` (all bars).
- * `zoomDivisor` 8 → ~1/8 of the range visible (~8× tighter than showing everything).
+ * Initial view: recent bars only (not `fitContent()`, which shrinks candles too small).
+ * Targets ~150 visible bars when the series is long enough; `barSpacing` is kept tight so
+ * the time scale is not forced to clip this range on narrow layouts.
  */
+const DEFAULT_VISIBLE_BAR_COUNT = 150;
+
 function applyDefaultZoomedView(chart: IChartApi, barCount: number) {
   const ts = chart.timeScale();
   if (barCount <= 1) {
     ts.fitContent();
     return;
   }
-  const zoomDivisor = 8;
   const minVisible = 8;
-  let visibleBars = Math.max(minVisible, Math.ceil(barCount / zoomDivisor));
-  visibleBars = Math.min(visibleBars, barCount);
+  let visibleBars = Math.min(barCount, DEFAULT_VISIBLE_BAR_COUNT);
+  visibleBars = Math.max(minVisible, visibleBars);
   const from = barCount - visibleBars;
   const to = barCount - 1;
   requestAnimationFrame(() => {
@@ -102,6 +104,8 @@ export function CandlestickChart({ candles, className }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick", Time> | null>(null);
+  /** Re-apply default zoom after `resize()` (ResizeObserver can run after first `setData`). */
+  const lastBarCountRef = useRef(0);
   const [interactionLocked, setInteractionLocked] = useState(true);
 
   useEffect(() => {
@@ -189,6 +193,8 @@ export function CandlestickChart({ candles, className }: Props) {
       const h = Math.max(1, Math.floor(el.clientHeight));
       chart.resize(w, h);
       applyRemScaledOptions();
+      const n = lastBarCountRef.current;
+      if (n > 0) applyDefaultZoomedView(chart, n);
     };
 
     const ro = new ResizeObserver(() => {
@@ -217,6 +223,7 @@ export function CandlestickChart({ candles, className }: Props) {
     const series = seriesRef.current;
     const chart = chartRef.current;
     if (!series) return;
+    lastBarCountRef.current = candles.length;
     if (candles.length === 0) {
       series.setData([]);
       return;

@@ -17,6 +17,10 @@ import { CandlestickChart } from "@/components/CandlestickChart";
 import { HeaderTradeToolbar } from "@/components/HeaderTradeToolbar";
 import { CryptoIcon } from "@/components/CryptoIcon";
 import { GraphDescriptor } from "@/components/GraphDescriptor";
+import {
+  InsightArticleDetailPanel,
+  InsightArticleStrategyHeader,
+} from "@/components/InsightArticleDetailPanel";
 import { InsightStrategySidebar } from "@/components/InsightStrategySidebar";
 import { MultiSymbolChartAnalysis } from "@/components/MultiSymbolChartAnalysis";
 import { SingleTokenChartToolbar } from "@/components/SingleTokenChartToolbar";
@@ -26,7 +30,7 @@ import type {
   InsightArticlePayload,
 } from "@/lib/insight-view-payload";
 import { writeInsightViewPayload } from "@/lib/insight-view-payload";
-import { MARKETS } from "@/lib/tokens";
+import { MARKETS, SIDEBAR_MARKETS } from "@/lib/tokens";
 
 const DND_MIME = "application/x-valentia-market+json";
 
@@ -46,12 +50,34 @@ type MarketDragPayload = {
   id: string;
 };
 
-/** Matches default `/api/candles` interval (`1h`); last 24 bars ≈ rolling 24h window. */
-const BARS_24H = 24;
+/** Dashboard charts: 15m bars — more candles per request than 1h for the same limit. */
+const CANDLE_FETCH_INTERVAL = "15m";
+const CANDLE_FETCH_LIMIT = 1000;
+
+function candlesFetchUrl(symbol: string): string {
+  const q = new URLSearchParams({
+    symbol,
+    interval: CANDLE_FETCH_INTERVAL,
+    limit: String(CANDLE_FETCH_LIMIT),
+  });
+  return `/api/candles?${q}`;
+}
+
+/** Trailing candle count whose span is ~24h for the active chart interval (HUD high/low). */
+function barsApproximating24h(interval: string): number {
+  const m = interval.match(/^(\d+)(m|h|d)$/i);
+  if (!m) return 24;
+  const n = Number(m[1]);
+  const u = m[2]!.toLowerCase() as "m" | "h" | "d";
+  const barMinutes = u === "m" ? n : u === "h" ? n * 60 : n * 24 * 60;
+  return Math.max(2, Math.ceil((24 * 60) / barMinutes));
+}
+
+const HIGH_LOW_WINDOW_BARS = barsApproximating24h(CANDLE_FETCH_INTERVAL);
 
 function highLowLast24Bars(candles: Candle[]): { high: number; low: number } | null {
   if (candles.length === 0) return null;
-  const slice = candles.slice(-BARS_24H);
+  const slice = candles.slice(-HIGH_LOW_WINDOW_BARS);
   let high = slice[0]!.high;
   let low = slice[0]!.low;
   for (const c of slice) {
@@ -210,9 +236,7 @@ export function Dashboard({
       setLeftLoading(true);
       setLeftError(null);
       try {
-        const res = await fetch(
-          `/api/candles?symbol=${encodeURIComponent(leftSymbol)}`,
-        );
+        const res = await fetch(candlesFetchUrl(leftSymbol));
         const body = await res.json();
         if (cancelled) return;
         if (!res.ok) {
@@ -251,9 +275,7 @@ export function Dashboard({
       setRightLoading(true);
       setRightError(null);
       try {
-        const res = await fetch(
-          `/api/candles?symbol=${encodeURIComponent(symbol)}`,
-        );
+        const res = await fetch(candlesFetchUrl(symbol));
         const body = await res.json();
         if (cancelled) return;
         if (!res.ok) {
@@ -304,9 +326,15 @@ export function Dashboard({
     compareZoneOpen || dualChartsLoaded || listDragActive;
   const tickerRows = useMemo(() => buildRows(), []);
   const sidebarMarkets = useMemo(() => {
-    if (sidebarListTab === "trending") return [...MARKETS];
+    const base = [...SIDEBAR_MARKETS];
+    if (sidebarListTab === "trending") return base;
     const pctBySymbol = new Map(tickerRows.map((r) => [r.symbol, r.pct]));
-    return MARKETS.filter((m) => (pctBySymbol.get(m.symbol) ?? 0) >= 0);
+    return base.sort((a, b) => {
+      const pa = pctBySymbol.get(a.symbol) ?? 0;
+      const pb = pctBySymbol.get(b.symbol) ?? 0;
+      if (pb !== pa) return pb - pa;
+      return a.symbol.localeCompare(b.symbol);
+    });
   }, [sidebarListTab, tickerRows]);
   const leftTickerRow = useMemo(
     () => tickerRows.find((r) => r.symbol === leftSymbol) ?? tickerRows[0]!,
@@ -463,9 +491,9 @@ export function Dashboard({
       />
       <MarketTickerStrip />
 
-      <div className="flex min-h-0 flex-1 bg-[#151515]">
+      <div className="flex min-h-0 min-w-0 w-full flex-1 flex-row bg-[#151515]">
         <main
-          className="v-dashboard-main-scroll relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-[rgba(13,13,13,1)] px-[56px] pt-[56px] pb-[2rem]"
+          className="v-dashboard-main-scroll relative flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-y-auto bg-[rgba(13,13,13,1)] px-[56px] pt-[56px] pb-[2rem]"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {anyLoading && (
@@ -475,7 +503,11 @@ export function Dashboard({
               </p>
             </div>
           )}
-          <SingleTokenChartToolbar multiToken={dualChartsLoaded} />
+          <SingleTokenChartToolbar
+            multiToken={dualChartsLoaded}
+            article={articleDetail}
+            chartLabel={leftLabel}
+          />
           <div className="flex h-[45rem] min-h-0 shrink-0 flex-col rounded-[0.5rem] bg-v-panel">
             <div className="flex min-h-0 min-w-0 flex-1 flex-row gap-[1rem] p-0">
               <section
@@ -609,17 +641,13 @@ export function Dashboard({
               >
                 ← Back to markets
               </button>
-              <div className="rounded-[0.5rem] border-[0.0625rem] border-v-border bg-[#171717] p-[2.5rem]">
-                <p className="font-insight text-[1.3125rem] font-medium text-v-subtle">
-                  {articleDetail.category}
-                </p>
-                <h2 className="mt-[1rem] font-insight text-[2rem] font-semibold leading-tight text-foreground">
-                  {articleDetail.headline}
-                </h2>
-                <p className="mt-[1.5rem] max-w-[60rem] font-insight text-[1.3125rem] leading-relaxed text-v-muted">
-                  {articleDetail.body}
-                </p>
-              </div>
+              <InsightArticleStrategyHeader />
+              <InsightArticleDetailPanel
+                article={articleDetail}
+                dualChart={dualChartsLoaded}
+                leftSymbol={leftSymbol}
+                rightSymbol={rightSymbol}
+              />
             </section>
           ) : (
             <MultiSymbolChartAnalysis
@@ -632,7 +660,7 @@ export function Dashboard({
         </main>
 
         <aside
-          className="crypto-sidebar flex min-h-0 w-[612px] shrink-0 flex-col gap-[1.5rem] border-l-[0.0625rem] border-v-border bg-[#171717] py-[1.5rem] [contain:layout]"
+          className="crypto-sidebar flex min-h-0 w-[675px] shrink-0 flex-col gap-[1.5rem] border-l-[0.0625rem] border-v-border bg-[#171717] py-[1.5rem] [contain:layout]"
         >
           {chartFrozen ? (
             <InsightStrategySidebar

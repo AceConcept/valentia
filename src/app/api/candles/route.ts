@@ -47,11 +47,10 @@ function describeBlockingResponse(
   return null;
 }
 
-/** CoinGecko `days` — larger range yields more bars (coarse intraday / 4h style). */
+/** CoinGecko `/coins/{id}/ohlc` granularity follows `days`: beyond ~30d it uses multi-day buckets (~few dozen points). Stay ≤30d for denser candles when Binance is unavailable. */
 function coingeckoDaysForLimit(limit: number): number {
   if (limit <= 60) return 7;
-  if (limit <= 180) return 30;
-  return 90;
+  return 30;
 }
 
 function candlesFromBinanceKlines(klines: string[][]): Candle[] {

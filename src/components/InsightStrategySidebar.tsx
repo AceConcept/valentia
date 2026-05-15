@@ -221,46 +221,50 @@ export function InsightStrategySidebar({
           className="flex shrink-0 flex-col gap-[1.25rem] rounded-[0.5rem] border-[0.0625rem] border-v-border bg-[#1c1c1c] p-[1.5rem]"
         >
           <h2 className="font-mono text-[1.125rem] font-semibold uppercase tracking-[0.12em] text-foreground">
-            Overall strategy
+            Trading Strategy
           </h2>
-          <p className="font-insight text-[1.25rem] leading-relaxed text-v-subtle">
+          <p className="font-mono text-[1.25rem] leading-relaxed text-[rgba(184,184,184,1)] [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace]">
             {copy.overall}
           </p>
 
           <div className="flex flex-col gap-[1rem]">
-            <div className="rounded-[0.5rem] border-[0.0625rem] border-v-border bg-[#151515] p-[1.25rem]">
-              <div className="flex items-start gap-[0.875rem]">
-                <CryptoIcon
-                  iconSlug={primary.iconSlug}
-                  label={leftLabel}
-                  className="mt-[0.125rem] h-[2.25rem] w-[2.25rem] shrink-0"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className={`font-mono text-[1rem] font-semibold uppercase tracking-wide ${ACCENT}`}>
+            <div className="rounded-[0.5rem] border-[0.0625rem] border-v-border bg-[#151515] p-[1.25rem] pb-[1.875rem]">
+              <div className="flex w-full min-w-0 flex-col gap-[0.5rem]">
+                <div className="flex items-center gap-[0.875rem]">
+                  <CryptoIcon
+                    iconSlug={primary.iconSlug}
+                    label={leftLabel}
+                    className="h-[2.25rem] w-[2.25rem] shrink-0"
+                  />
+                  <p
+                    className={`m-0 min-w-0 font-mono text-[21px] font-semibold uppercase tracking-wide ${ACCENT}`}
+                  >
                     {copy.entryTitle}
                   </p>
-                  <p className="mt-[0.5rem] font-insight text-[1.1875rem] leading-relaxed text-v-muted">
-                    {copy.entryBody}
-                  </p>
                 </div>
+                <p className="m-0 min-w-0 pl-[calc(2.25rem+0.875rem)] font-mono text-[1.1875rem] leading-relaxed text-v-muted [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace]">
+                  {copy.entryBody}
+                </p>
               </div>
             </div>
 
-            <div className="rounded-[0.5rem] border-[0.0625rem] border-v-border bg-[#151515] p-[1.25rem]">
-              <div className="flex items-start gap-[0.875rem]">
-                <CryptoIcon
-                  iconSlug={(secondary ?? primary).iconSlug}
-                  label={secondaryLabel || leftLabel}
-                  className="mt-[0.125rem] h-[2.25rem] w-[2.25rem] shrink-0"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className={`font-mono text-[1rem] font-semibold uppercase tracking-wide ${ACCENT}`}>
+            <div className="rounded-[0.5rem] border-[0.0625rem] border-v-border bg-[#151515] p-[1.25rem] pb-[1.875rem]">
+              <div className="flex w-full min-w-0 flex-col gap-[0.5rem]">
+                <div className="flex items-center gap-[0.875rem]">
+                  <CryptoIcon
+                    iconSlug={(secondary ?? primary).iconSlug}
+                    label={secondaryLabel || leftLabel}
+                    className="h-[2.25rem] w-[2.25rem] shrink-0"
+                  />
+                  <p
+                    className={`m-0 min-w-0 font-mono text-[21px] font-semibold uppercase tracking-wide ${ACCENT}`}
+                  >
                     {copy.riskTitle}
                   </p>
-                  <p className="mt-[0.5rem] font-insight text-[1.1875rem] leading-relaxed text-v-muted">
-                    {copy.riskBody}
-                  </p>
                 </div>
+                <p className="m-0 min-w-0 pl-[calc(2.25rem+0.875rem)] font-mono text-[1.1875rem] leading-relaxed text-[rgba(201,201,201,1)] [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace]">
+                  {copy.riskBody}
+                </p>
               </div>
             </div>
           </div>
@@ -271,45 +275,45 @@ export function InsightStrategySidebar({
             <button
               type="button"
               onClick={() => setOpen1((o) => !o)}
-              className="flex w-full items-center justify-between gap-[1rem] px-[1.25rem] py-[1.125rem] text-left font-insight text-[1.1875rem] leading-snug text-foreground transition-colors hover:bg-[#222]"
+              className="flex w-full items-center justify-between gap-[1rem] px-[1.25rem] py-[1.125rem] text-left font-mono text-[1.25rem] leading-relaxed text-foreground [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace] transition-colors hover:bg-[#222]"
             >
               <span className="min-w-0 flex-1">{copy.accordion1Title}</span>
               <Chevron open={open1} />
             </button>
             {open1 ? (
               <div className="flex flex-col gap-[0.75rem] border-t-[0.0625rem] border-v-border px-[1.25rem] pb-[1.25rem] pt-[1rem]">
-                <div className="rounded-[0.375rem] border-[0.0625rem] border-v-border bg-[#151515] p-[1rem]">
-                  <div className="flex items-start gap-[0.75rem]">
-                    <CryptoIcon
-                      iconSlug={(secondary ?? primary).iconSlug}
-                      label={secondaryLabel || leftLabel}
-                      className="mt-[0.125rem] h-[1.75rem] w-[1.75rem] shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-mono text-[0.9375rem] font-semibold uppercase tracking-wide text-foreground">
+                <div className="rounded-[0.375rem] border-[0.0625rem] border-v-border bg-[#151515] p-[1rem] pb-[1.875rem]">
+                  <div className="flex w-full min-w-0 flex-col gap-[0.5rem]">
+                    <div className="flex items-center gap-[0.75rem]">
+                      <CryptoIcon
+                        iconSlug={(secondary ?? primary).iconSlug}
+                        label={secondaryLabel || leftLabel}
+                        className="h-[1.75rem] w-[1.75rem] shrink-0"
+                      />
+                      <p className="m-0 min-w-0 font-mono text-[21px] font-semibold uppercase tracking-wide text-foreground [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace]">
                         {copy.obs1Title}
                       </p>
-                      <p className="mt-[0.375rem] font-insight text-[1.0625rem] leading-relaxed text-v-muted">
-                        {copy.obs1Body}
-                      </p>
                     </div>
+                    <p className="m-0 min-w-0 pl-[calc(1.75rem+0.75rem)] font-mono text-[1.1875rem] leading-relaxed text-v-muted [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace]">
+                      {copy.obs1Body}
+                    </p>
                   </div>
                 </div>
-                <div className="rounded-[0.375rem] border-[0.0625rem] border-v-border bg-[#151515] p-[1rem]">
-                  <div className="flex items-start gap-[0.75rem]">
-                    <CryptoIcon
-                      iconSlug={primary.iconSlug}
-                      label={leftLabel}
-                      className="mt-[0.125rem] h-[1.75rem] w-[1.75rem] shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-mono text-[0.9375rem] font-semibold uppercase tracking-wide text-foreground">
+                <div className="rounded-[0.375rem] border-[0.0625rem] border-v-border bg-[#151515] p-[1rem] pb-[1.875rem]">
+                  <div className="flex w-full min-w-0 flex-col gap-[0.5rem]">
+                    <div className="flex items-center gap-[0.75rem]">
+                      <CryptoIcon
+                        iconSlug={primary.iconSlug}
+                        label={leftLabel}
+                        className="h-[1.75rem] w-[1.75rem] shrink-0"
+                      />
+                      <p className="m-0 min-w-0 font-mono text-[21px] font-semibold uppercase tracking-wide text-foreground [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace]">
                         {copy.obs2Title}
                       </p>
-                      <p className="mt-[0.375rem] font-insight text-[1.0625rem] leading-relaxed text-v-muted">
-                        {copy.obs2Body}
-                      </p>
                     </div>
+                    <p className="m-0 min-w-0 pl-[calc(1.75rem+0.75rem)] font-mono text-[1.1875rem] leading-relaxed text-v-muted [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace]">
+                      {copy.obs2Body}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -320,13 +324,13 @@ export function InsightStrategySidebar({
             <button
               type="button"
               onClick={() => setOpen2((o) => !o)}
-              className="flex w-full items-center justify-between gap-[1rem] px-[1.25rem] py-[1.125rem] text-left font-insight text-[1.1875rem] leading-snug text-foreground transition-colors hover:bg-[#222]"
+              className="flex w-full items-center justify-between gap-[1rem] px-[1.25rem] py-[1.125rem] text-left font-mono text-[1.25rem] leading-relaxed text-foreground [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace] transition-colors hover:bg-[#222]"
             >
               <span className="min-w-0 flex-1">{copy.accordion2Title}</span>
               <Chevron open={open2} />
             </button>
             {open2 ? (
-              <div className="border-t-[0.0625rem] border-v-border px-[1.25rem] pb-[1.25rem] pt-[1rem] font-insight text-[1.0625rem] leading-relaxed text-v-muted">
+              <div className="border-t-[0.0625rem] border-v-border px-[1.25rem] pb-[1.25rem] pt-[1rem] font-mono text-[1.1875rem] leading-relaxed text-v-muted [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace]">
                 Placeholder detail: watch how {primary.label} responds on{" "}
                 {primary.id}/USDT
                 {secondary

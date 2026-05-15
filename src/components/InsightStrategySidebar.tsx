@@ -242,7 +242,7 @@ export function InsightStrategySidebar({
                     {copy.entryTitle}
                   </p>
                 </div>
-                <p className="m-0 min-w-0 pl-[calc(2.25rem+0.875rem)] font-mono text-[1.1875rem] leading-relaxed text-v-muted [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace]">
+                <p className="m-0 min-w-0 pl-[calc(2.25rem+0.875rem)] font-mono text-[1.1875rem] leading-relaxed text-[#C9C9C9] [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace]">
                   {copy.entryBody}
                 </p>
               </div>
@@ -262,7 +262,7 @@ export function InsightStrategySidebar({
                     {copy.riskTitle}
                   </p>
                 </div>
-                <p className="m-0 min-w-0 pl-[calc(2.25rem+0.875rem)] font-mono text-[1.1875rem] leading-relaxed text-[rgba(201,201,201,1)] [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace]">
+                <p className="m-0 min-w-0 pl-[calc(2.25rem+0.875rem)] font-mono text-[1.1875rem] leading-relaxed text-[#C9C9C9] [font-family:var(--font-ibm-plex-mono),ui-monospace,monospace]">
                   {copy.riskBody}
                 </p>
               </div>

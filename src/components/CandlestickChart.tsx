@@ -11,6 +11,8 @@ import {
 } from "lightweight-charts";
 import { useEffect, useRef, useState } from "react";
 
+import { ChartInsightPositionOverlays, CHART_INSIGHT_OVERLAY_COUNT } from "@/components/ChartInsightPositionOverlays";
+
 /** Candle plot + chart container (matches GraphDescriptor bar). */
 const CHART_CANVAS_BG = "#1b1b1b";
 
@@ -28,6 +30,9 @@ const DESIGN_MIN_BAR_SPACING = 0.75;
 type Props = {
   candles: CandlestickData<Time>[];
   className?: string;
+  /** Which insight card (0–5) shows its trend square on Chart A, or `null` for none. */
+  insightPositionOverlayActiveCardIndex?: number | null;
+  onInsightPositionOverlaysRequestClose?: () => void;
 };
 
 /** Current root font-size in CSS px (same value `1rem` resolves to). */
@@ -100,13 +105,32 @@ function interactionChartOptions(locked: boolean) {
   };
 }
 
-export function CandlestickChart({ candles, className }: Props) {
+export function CandlestickChart({
+  candles,
+  className,
+  insightPositionOverlayActiveCardIndex = null,
+  onInsightPositionOverlaysRequestClose,
+}: Props) {
+  const overlaysActive =
+    insightPositionOverlayActiveCardIndex !== null &&
+    insightPositionOverlayActiveCardIndex >= 0 &&
+    insightPositionOverlayActiveCardIndex < CHART_INSIGHT_OVERLAY_COUNT;
   const containerRef = useRef<HTMLDivElement>(null);
+  const chartLayoutRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick", Time> | null>(null);
   /** Re-apply default zoom after `resize()` (ResizeObserver can run after first `setData`). */
   const lastBarCountRef = useRef(0);
   const [interactionLocked, setInteractionLocked] = useState(true);
+
+  useEffect(() => {
+    if (overlaysActive) {
+      setInteractionLocked(false);
+      queueMicrotask(() => {
+        chartRef.current?.applyOptions(interactionChartOptions(false));
+      });
+    }
+  }, [overlaysActive]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -238,22 +262,13 @@ export function CandlestickChart({ candles, className }: Props) {
         "relative flex min-h-0 min-w-0 flex-1 flex-col outline-none",
         className ?? "",
       ].join(" ")}
-      onPointerDownCapture={() => {
-        setInteractionLocked((locked) => {
-          if (!locked) return locked;
-          queueMicrotask(() => {
-            chartRef.current?.applyOptions(interactionChartOptions(false));
-          });
-          return false;
-        });
-      }}
       aria-label={
         interactionLocked
           ? "Candlestick chart, view locked. Click to enable pan and zoom."
           : "Candlestick chart"
       }
     >
-      {interactionLocked ? (
+      {interactionLocked && !overlaysActive ? (
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex justify-center pb-[0.75rem]"
           aria-hidden
@@ -264,9 +279,29 @@ export function CandlestickChart({ candles, className }: Props) {
         </div>
       ) : null}
       <div
-        ref={containerRef}
-        className="min-h-0 w-full min-w-0 flex-1 bg-[#1b1b1b]"
-      />
+        ref={chartLayoutRef}
+        className="relative min-h-0 w-full min-w-0 flex-1 bg-[#1b1b1b]"
+        onPointerDownCapture={() => {
+          if (overlaysActive) return;
+          setInteractionLocked((locked) => {
+            if (!locked) return locked;
+            queueMicrotask(() => {
+              chartRef.current?.applyOptions(interactionChartOptions(false));
+            });
+            return false;
+          });
+        }}
+      >
+        <div ref={containerRef} className="h-full min-h-0 w-full min-w-0" />
+        <ChartInsightPositionOverlays
+          chartRef={chartRef}
+          seriesRef={seriesRef}
+          layoutRootRef={chartLayoutRef}
+          candles={candles}
+          activeCardIndex={insightPositionOverlayActiveCardIndex ?? null}
+          onRequestClose={onInsightPositionOverlaysRequestClose ?? (() => {})}
+        />
+      </div>
     </div>
   );
 }

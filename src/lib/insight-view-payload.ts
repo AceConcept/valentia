@@ -30,6 +30,14 @@ const INSIGHT_CATEGORY_DESCRIPTION_BY_KEY: Record<string, string> = {
     "When paths between related charts stop agreeing—one makes extremes the other won’t—that tension often resolves with catch-up, mean reversion, or a fresh leg once one side snaps back into line.",
   volatility:
     "Range expansion, wick asymmetry, and one-off spikes versus the other leg of a pair; helps separate shared macro moves from stress that is concentrated in a single name or venue.",
+  "liquidity & structure":
+    "Where resting liquidity and prior session structure overlap with spot: sweeps, reclaims, and failed breaks there often matter as much as the candle pattern itself.",
+  momentum:
+    "Impulse, pullback, and expansion rhythms on crypto tape: when compression follows a leg, the next break frequently inherits that leg’s direction if flow confirms.",
+  flow:
+    "Perps, spot taker flow, and funding skew describe who is paying to express the view—useful when price is flat but positioning is shifting under the surface.",
+  risk:
+    "Calendar, venue depth, and gap risk in 24/7 markets: thinner books and clustered stops can exaggerate moves away from ‘fair’ until liquidity returns.",
 };
 
 /**

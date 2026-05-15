@@ -29,6 +29,10 @@ import type {
   FrozenChartSnapshot,
   InsightArticlePayload,
 } from "@/lib/insight-view-payload";
+import {
+  CRYPTO_SIDEBAR_WIDTH_CLASS,
+  INSIGHT_SIDEBAR_WIDTH_CLASS,
+} from "@/lib/layout";
 import { writeInsightViewPayload } from "@/lib/insight-view-payload";
 import { MARKETS, SIDEBAR_MARKETS } from "@/lib/tokens";
 
@@ -225,6 +229,18 @@ export function Dashboard({
   const [chartLayoutKey, setChartLayoutKey] = useState(
     () => chartSnap?.chartLayoutKey ?? 0,
   );
+
+  /** Which insight card (0–5) shows its trend square on Chart A, or `null` when none. */
+  const [insightCardOverlayActiveIndex, setInsightCardOverlayActiveIndex] =
+    useState<number | null>(null);
+
+  useEffect(() => {
+    setInsightCardOverlayActiveIndex(null);
+  }, [leftSymbol, rightSymbol, chartLayoutKey]);
+
+  useEffect(() => {
+    if (articleDetail) setInsightCardOverlayActiveIndex(null);
+  }, [articleDetail]);
 
   useEffect(() => {
     if (chartFrozen) return;
@@ -443,6 +459,7 @@ export function Dashboard({
   const openInsightArticle = useCallback(
     (article: InsightArticlePayload) => {
       if (chartFrozen) return;
+      setInsightCardOverlayActiveIndex(null);
       writeInsightViewPayload({
         chart: {
           v: 1,
@@ -493,7 +510,7 @@ export function Dashboard({
 
       <div className="flex min-h-0 min-w-0 w-full flex-1 flex-row bg-[#151515]">
         <main
-          className="v-dashboard-main-scroll relative flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-y-auto bg-[rgba(13,13,13,1)] px-[56px] pt-[56px] pb-[2rem]"
+          className="v-dashboard-main-scroll relative flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-y-auto bg-[rgba(13,13,13,1)] px-[72px] pt-[56px] pb-[2rem]"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {anyLoading && (
@@ -509,7 +526,7 @@ export function Dashboard({
             chartLabel={leftLabel}
           />
           <div className="flex h-[45rem] min-h-0 shrink-0 flex-col rounded-[0.5rem] bg-v-panel">
-            <div className="flex min-h-0 min-w-0 flex-1 flex-row gap-[1rem] p-0">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-row gap-[36px] p-0">
               <section
                 className={
                   showCompareColumn
@@ -539,6 +556,12 @@ export function Dashboard({
                     key={`${leftSymbol}-${chartLayoutKey}`}
                     candles={leftChartData}
                     className="h-full min-h-0 w-full min-w-0 flex-1"
+                    insightPositionOverlayActiveCardIndex={
+                      articleDetail ? null : insightCardOverlayActiveIndex
+                    }
+                    onInsightPositionOverlaysRequestClose={() =>
+                      setInsightCardOverlayActiveIndex(null)
+                    }
                   />
                 </div>
               </section>
@@ -594,6 +617,12 @@ export function Dashboard({
                         key={`${rightSymbol}-${chartLayoutKey}`}
                         candles={rightChartData}
                         className="h-full min-h-0 w-full min-w-0 flex-1"
+                        insightPositionOverlayActiveCardIndex={
+                          articleDetail ? null : insightCardOverlayActiveIndex
+                        }
+                        onInsightPositionOverlaysRequestClose={() =>
+                          setInsightCardOverlayActiveIndex(null)
+                        }
                       />
                     </div>
                   </>
@@ -654,13 +683,26 @@ export function Dashboard({
               dualChart={dualChartsLoaded}
               chartALabel={leftLabel}
               chartBLabel={rightLabel ?? "Chart B"}
+              chartPrimarySymbol={leftSymbol}
               onInsightArticleOpen={openInsightArticle}
+              onInsightCardSurfaceActivate={
+                chartFrozen || articleDetail
+                  ? undefined
+                  : (cardIndex) =>
+                      setInsightCardOverlayActiveIndex((cur) =>
+                        cur === cardIndex ? null : cardIndex,
+                      )
+              }
             />
           )}
         </main>
 
         <aside
-          className="crypto-sidebar flex min-h-0 w-[675px] shrink-0 flex-col gap-[1.5rem] border-l-[0.0625rem] border-v-border bg-[#171717] py-[1.5rem] [contain:layout]"
+          className={[
+            chartFrozen ? "insight-sidebar" : "crypto-sidebar",
+            chartFrozen ? INSIGHT_SIDEBAR_WIDTH_CLASS : CRYPTO_SIDEBAR_WIDTH_CLASS,
+            "flex min-h-0 shrink-0 flex-col gap-[1.5rem] border-l-[0.0625rem] border-v-border bg-[#171717] py-[1.5rem] [contain:layout]",
+          ].join(" ")}
         >
           {chartFrozen ? (
             <InsightStrategySidebar

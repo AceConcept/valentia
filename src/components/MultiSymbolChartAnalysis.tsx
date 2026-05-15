@@ -1,5 +1,10 @@
-import type { ReactNode } from "react";
+"use client";
 
+import type { ReactNode } from "react";
+import { useMemo } from "react";
+
+import type { InsightIconKind } from "@/lib/insight-card-pool";
+import { pickSingleChartInsightCardContents } from "@/lib/insight-card-pool";
 import type { InsightArticlePayload } from "@/lib/insight-view-payload";
 
 export type InsightCard = {
@@ -121,44 +126,22 @@ function IconDivergence() {
   );
 }
 
-const SINGLE_CHART_CARDS: InsightCard[] = [
-  {
-    category: "Trend & Levels",
-    headline: "Doji Spotted",
-    body: "Three consecutive Doji candles are appearing, indicating significant market indecision and a potential trend reversal point.",
-    icon: <IconTrendLevels />,
-  },
-  {
-    category: "Patterns & Shapes",
-    headline: "Critical Resistance Test",
-    body: "Price is approaching the $50,000 historical resistance level where it has reversed three times previously.",
-    icon: <IconPatterns />,
-  },
-  {
-    category: "Outside Influences",
-    headline: "Fundamental Override Signal",
-    body: "Positive regulatory news is creating bullish sentiment that could override the technical bearish pattern currently forming on the chart.",
-    icon: <IconOutside />,
-  },
-  {
-    category: "Trading",
-    headline: "Weak Breakout",
-    body: "The recent price move shows declining volume, suggesting weak conviction and a higher risk of a false breakout.",
-    icon: <IconTrading />,
-  },
-  {
-    category: "Volume",
-    headline: "Absorption at lows",
-    body: "Heavy prints on the bid are soaking up sell pressure without new lows, often a precursor to a short-term bounce.",
-    icon: <IconVolume />,
-  },
-  {
-    category: "Inter-market",
-    headline: "ETH–BTC spread widening",
-    body: "Ether is outperforming Bitcoin on this timeframe; risk-on rotation within crypto majors may continue if the ratio holds.",
-    icon: <IconDivergence />,
-  },
-];
+function insightIconForKind(kind: InsightIconKind): ReactNode {
+  switch (kind) {
+    case "trend":
+      return <IconTrendLevels />;
+    case "patterns":
+      return <IconPatterns />;
+    case "outside":
+      return <IconOutside />;
+    case "trading":
+      return <IconTrading />;
+    case "volume":
+      return <IconVolume />;
+    case "divergence":
+      return <IconDivergence />;
+  }
+}
 
 function buildCompareChartCards(left: string, right: string): InsightCard[] {
   return [
@@ -214,9 +197,11 @@ function truncateInsightDisplayText(text: string, maxChars: number): string {
 function InsightCardArticle({
   card,
   onOpen,
+  onActivateSurface,
 }: {
   card: InsightCard;
   onOpen?: (article: InsightArticlePayload) => void;
+  onActivateSurface?: () => void;
 }) {
   const bodyPreview = truncateInsightDisplayText(
     card.body,
@@ -232,7 +217,17 @@ function InsightCardArticle({
   };
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col items-stretch gap-[1.3125rem] rounded-[0.25rem] border-[0.0625rem] border-v-border bg-[#171717] px-[2.5rem] pt-[2.5rem] pb-[30px] text-left">
+    <div
+      className="flex min-h-0 min-w-0 flex-1 cursor-pointer flex-col items-stretch gap-[1.3125rem] rounded-[0.25rem] border-[0.0625rem] border-v-border bg-[#171717] px-[2.5rem] pt-[2.5rem] pb-[30px] text-left transition-[border-color,background-color] hover:border-v-muted/40 hover:bg-[#1c1c1c]"
+      onClick={(e) => {
+        if (
+          (e.target as HTMLElement).closest("[data-insight-action='view-strategy']")
+        ) {
+          return;
+        }
+        onActivateSurface?.();
+      }}
+    >
       <div className="flex min-w-0 flex-1 flex-col gap-[1.3125rem]">
         <div className="flex min-w-0 items-center gap-[1.3125rem]">
           <div className={INSIGHT_MARK_BOX}>{card.icon}</div>
@@ -251,8 +246,9 @@ function InsightCardArticle({
       </div>
       <button
         type="button"
+        data-insight-action="view-strategy"
         onClick={openArticle}
-        className="mt-auto inline-flex w-full shrink-0 cursor-pointer items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border bg-[#272727] px-[1.25rem] py-[0.875rem] font-mono text-[0.8125rem] font-semibold uppercase tracking-[0.06em] text-v-muted transition-[background-color,border-color,color] hover:border-v-muted/40 hover:bg-[#333333] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-v-muted/35 active:bg-[#222222]"
+        className="mt-auto inline-flex h-[3.5rem] w-full shrink-0 cursor-pointer items-center justify-center rounded-[0.375rem] border-[0.0625rem] border-v-border bg-[#272727] px-[1.25rem] font-mono text-[1rem] font-semibold uppercase tracking-[0.06em] text-v-muted transition-[background-color,border-color,color] hover:border-v-muted/40 hover:bg-[#333333] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-v-muted/35 active:bg-[#222222]"
       >
         View Strategy
       </button>
@@ -265,19 +261,31 @@ export type MultiSymbolChartAnalysisProps = {
   dualChart?: boolean;
   chartALabel?: string;
   chartBLabel?: string;
+  /** Chart A spot symbol — drives which six insight cards (from the 10-template pool) are shown and in what order. */
+  chartPrimarySymbol?: string;
   /** Persist chart + open `/insight` with article text (markets dashboard only). */
   onInsightArticleOpen?: (article: InsightArticlePayload) => void;
+  /** When set, clicking an insight card (except View Strategy) toggles that card’s chart overlay on Chart A. */
+  onInsightCardSurfaceActivate?: (cardIndex: number) => void;
 };
 
 export function MultiSymbolChartAnalysis({
   dualChart = false,
   chartALabel = "Chart A",
   chartBLabel = "Chart B",
+  chartPrimarySymbol = "BTCUSDT",
   onInsightArticleOpen,
+  onInsightCardSurfaceActivate,
 }: MultiSymbolChartAnalysisProps) {
-  const cards: InsightCard[] = dualChart
-    ? buildCompareChartCards(chartALabel, chartBLabel)
-    : SINGLE_CHART_CARDS;
+  const cards: InsightCard[] = useMemo(() => {
+    if (dualChart) return buildCompareChartCards(chartALabel, chartBLabel);
+    return pickSingleChartInsightCardContents(chartPrimarySymbol).map((c) => ({
+      category: c.category,
+      headline: c.headline,
+      body: c.body,
+      icon: insightIconForKind(c.icon),
+    }));
+  }, [dualChart, chartALabel, chartBLabel, chartPrimarySymbol]);
   const cardRows: InsightCard[][] = [
     cards.slice(0, 3),
     cards.slice(3, 6),
@@ -285,18 +293,26 @@ export function MultiSymbolChartAnalysis({
 
   return (
     <section className="mt-[2.5rem] flex w-full min-w-0 shrink-0 flex-col gap-[2.5rem] pb-[0.5rem]">
-      {cardRows.map((row) => (
+      {cardRows.map((row, rowIdx) => (
         <div
-          key={row.map((c) => c.headline).join("-")}
+          key={`${rowIdx}-${row.map((c) => c.headline).join("-")}`}
           className="flex w-full min-w-0 shrink-0 items-start gap-[2.25rem]"
         >
-          {row.map((card) => (
-            <InsightCardArticle
-              key={card.headline}
-              card={card}
-              onOpen={onInsightArticleOpen}
-            />
-          ))}
+          {row.map((card, colIdx) => {
+            const cardIndex = rowIdx * 3 + colIdx;
+            return (
+              <InsightCardArticle
+                key={`${cardIndex}-${card.headline}`}
+                card={card}
+                onOpen={onInsightArticleOpen}
+                onActivateSurface={
+                  onInsightCardSurfaceActivate
+                    ? () => onInsightCardSurfaceActivate(cardIndex)
+                    : undefined
+                }
+              />
+            );
+          })}
         </div>
       ))}
     </section>

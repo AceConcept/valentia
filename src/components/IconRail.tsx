@@ -77,7 +77,7 @@ export function IconRail() {
       className="flex min-h-0 h-full w-[6.75rem] shrink-0 flex-col self-stretch overflow-hidden border-r-[0.0625rem] border-v-border bg-background [contain:layout]"
       aria-label="Primary tools"
     >
-      <div className="flex h-[6.25rem] shrink-0 flex-col items-center justify-center border-b-[0.0625rem] border-v-border px-[1rem] pb-[0.75rem] pt-[1rem]">
+      <div className="flex h-[6.25rem] shrink-0 flex-col items-center justify-center px-[1rem] pb-[0.75rem] pt-[1rem]">
         <RailTriangleLogo />
       </div>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">

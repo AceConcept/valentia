@@ -1,4 +1,4 @@
-/** Spot pair for Binance; `coingeckoId` is used when Binance is geo-blocked. */
+/** Spot pair for Binance; `coingeckoId` is used when Binance is geo-blocked. App tracks ten majors only. */
 export const MARKETS = [
   {
     id: "BTC",
@@ -8,25 +8,11 @@ export const MARKETS = [
     iconSlug: "btc",
   },
   {
-    id: "ETH",
-    label: "Ethereum",
-    symbol: "ETHUSDT",
-    coingeckoId: "ethereum",
-    iconSlug: "eth",
-  },
-  {
     id: "SOL",
     label: "Solana",
     symbol: "SOLUSDT",
     coingeckoId: "solana",
     iconSlug: "sol",
-  },
-  {
-    id: "BNB",
-    label: "BNB",
-    symbol: "BNBUSDT",
-    coingeckoId: "binancecoin",
-    iconSlug: "bnb",
   },
   {
     id: "XRP",
@@ -36,13 +22,6 @@ export const MARKETS = [
     iconSlug: "xrp",
   },
   {
-    id: "DOGE",
-    label: "Dogecoin",
-    symbol: "DOGEUSDT",
-    coingeckoId: "dogecoin",
-    iconSlug: "doge",
-  },
-  {
     id: "ADA",
     label: "Cardano",
     symbol: "ADAUSDT",
@@ -50,25 +29,11 @@ export const MARKETS = [
     iconSlug: "ada",
   },
   {
-    id: "DOT",
-    label: "Polkadot",
-    symbol: "DOTUSDT",
-    coingeckoId: "polkadot",
-    iconSlug: "dot",
-  },
-  {
     id: "AVAX",
     label: "Avalanche",
     symbol: "AVAXUSDT",
     coingeckoId: "avalanche-2",
     iconSlug: "avax",
-  },
-  {
-    id: "LINK",
-    label: "Chainlink",
-    symbol: "LINKUSDT",
-    coingeckoId: "chainlink",
-    iconSlug: "link",
   },
   {
     id: "ATOM",
@@ -85,25 +50,11 @@ export const MARKETS = [
     iconSlug: "ltc",
   },
   {
-    id: "UNI",
-    label: "Uniswap",
-    symbol: "UNIUSDT",
-    coingeckoId: "uniswap",
-    iconSlug: "uni",
-  },
-  {
     id: "TRX",
     label: "TRON",
     symbol: "TRXUSDT",
     coingeckoId: "tron",
     iconSlug: "trx",
-  },
-  {
-    id: "ARB",
-    label: "Arbitrum",
-    symbol: "ARBUSDT",
-    coingeckoId: "arbitrum",
-    iconSlug: "arb",
   },
   {
     id: "OP",
@@ -113,102 +64,11 @@ export const MARKETS = [
     iconSlug: "op",
   },
   {
-    id: "APT",
-    label: "Aptos",
-    symbol: "APTUSDT",
-    coingeckoId: "aptos",
-    iconSlug: "apt",
-  },
-  {
     id: "NEAR",
     label: "NEAR",
     symbol: "NEARUSDT",
     coingeckoId: "near",
     iconSlug: "near",
-  },
-  {
-    id: "FIL",
-    label: "Filecoin",
-    symbol: "FILUSDT",
-    coingeckoId: "filecoin",
-    iconSlug: "fil",
-  },
-  {
-    id: "ICP",
-    label: "Internet Computer",
-    symbol: "ICPUSDT",
-    coingeckoId: "internet-computer",
-    iconSlug: "icp",
-  },
-  {
-    id: "ETC",
-    label: "Ethereum Classic",
-    symbol: "ETCUSDT",
-    coingeckoId: "ethereum-classic",
-    iconSlug: "etc",
-  },
-  {
-    id: "HBAR",
-    label: "Hedera",
-    symbol: "HBARUSDT",
-    coingeckoId: "hedera-hashgraph",
-    iconSlug: "hbar",
-  },
-  {
-    id: "VET",
-    label: "VeChain",
-    symbol: "VETUSDT",
-    coingeckoId: "vechain",
-    iconSlug: "vet",
-  },
-  {
-    id: "ALGO",
-    label: "Algorand",
-    symbol: "ALGOUSDT",
-    coingeckoId: "algorand",
-    iconSlug: "algo",
-  },
-  {
-    id: "XLM",
-    label: "Stellar",
-    symbol: "XLMUSDT",
-    coingeckoId: "stellar",
-    iconSlug: "xlm",
-  },
-  {
-    id: "SUI",
-    label: "Sui",
-    symbol: "SUIUSDT",
-    coingeckoId: "sui",
-    iconSlug: "sui",
-  },
-  {
-    id: "SHIB",
-    label: "Shiba Inu",
-    symbol: "SHIBUSDT",
-    coingeckoId: "shiba-inu",
-    iconSlug: "shib",
-  },
-  {
-    id: "INJ",
-    label: "Injective",
-    symbol: "INJUSDT",
-    coingeckoId: "injective-protocol",
-    iconSlug: "inj",
-  },
-  {
-    id: "TON",
-    label: "Toncoin",
-    symbol: "TONUSDT",
-    coingeckoId: "the-open-network",
-    iconSlug: "ton",
-  },
-  {
-    id: "STX",
-    label: "Stacks",
-    symbol: "STXUSDT",
-    coingeckoId: "stacks",
-    iconSlug: "stx",
   },
 ] as const;
 
